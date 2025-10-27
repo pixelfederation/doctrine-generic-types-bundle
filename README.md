@@ -1,7 +1,8 @@
-[//]: # ( [![CI Status]&#40;https://github.com/pixelfederation/doctrine-generic-types-bundle/workflows/CI/badge.svg&#41;]&#40;https://github.com/pixelfederation/doctrine-generic-types-bundle/actions?query=workflow%3ACI&#41;)
-[//]: # ( [![Code Coverage]&#40;https://codecov.io/gh/pixelfederation/doctrine-generic-types-bundle/branch/master/graph/badge.svg?token=77JIFYSUC5&#41;]&#40;https://codecov.io/gh/pixelfederation/doctrine-generic-types-bundle&#41;)
-[//]: # ([![Latest Version]&#40;https://img.shields.io/packagist/v/pixelfederation/pixelfederation/doctrine-generic-types-bundle.svg&#41;]&#40;https://packagist.org/packages/pixelfederation/doctrine-generic-types-bundle&#41;)
-[//]: # ([![Downloads]&#40;https://img.shields.io/packagist/dm/pixelfederation/doctrine-generic-types-bundley&#41;]&#40;https://packagist.org/packages/pixelfederation/doctrine-generic-types-bundle&#41;)
+[![Grumphp](https://github.com/pixelfederation/doctrine-generic-types-bundle/actions/workflows/grumphp.yaml/badge.svg)](https://github.com/pixelfederation/doctrine-generic-types-bundle/actions/workflows/grumphp.yaml)
+[![Latest Version](https://img.shields.io/packagist/v/pixelfederation/doctrine-generic-types-bundle.svg)](https://packagist.org/packages/pixelfederation/doctrine-generic-types-bundle)
+[![Downloads](https://img.shields.io/packagist/dm/pixelfederation/doctrine-generic-types-bundley)](https://packagist.org/packages/pixelfederation/doctrine-generic-types-bundle)
+
+[//]: # ([![Code Coverage]&#40;https://codecov.io/gh/pixelfederation/doctrine-generic-types-bundle/branch/master/graph/badge.svg?token=77JIFYSUC5&#41;]&#40;https://codecov.io/gh/pixelfederation/doctrine-generic-types-bundle&#41;)
 
 # PixelFederation DoctrineGenericTypesBundle
 

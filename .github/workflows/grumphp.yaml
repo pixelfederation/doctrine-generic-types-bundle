@@ -43,6 +43,12 @@ jobs:
       - name: Run static analysis (GrumPHP)
         run: docker exec ${{ env.php-container }} php vendor/bin/grumphp run --testsuite=php${{ matrix.php-version }}
 
+#      - name: Upload coverage to Codecov
+#        uses: codecov/codecov-action@v4
+#        with:
+#          files: ./path/to/coverage.xml
+#          token: ${{ secrets.CODECOV_TOKEN }}
+
       - name: Stop containers
         if: always()
         run: docker compose -f "compose.yaml" down -v
