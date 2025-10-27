@@ -1,0 +1,7 @@
+parameters:
+    treatPhpDocTypesAsCertain: false
+    excludePaths:
+        - './tests'
+    level: max
+    paths:
+        - src/

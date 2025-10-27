@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<ruleset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/squizlabs/php_codesniffer/phpcs.xsd">
+
+  <arg name="basepath" value="."/>
+  <arg name="colors"/>
+  <arg name="extensions" value="php"/>
+
+  <config name="testVersion" value="8.3" />
+  <config name="cache" value="false" />
+
+  <file>src/</file>
+  <file>tests/</file>
+
+  <rule ref="vendor/pixelfederation/coding-standards/phpcs.ruleset.83.non-ddd.xml" >
+    <exclude name="Generic.Files.LineLength.TooLong" />
+  </rule>
+
+  <rule ref="SlevomatCodingStandard.Files.TypeNameMatchesFileName">
+    <properties>
+      <property name="rootNamespaces" type="array">
+        <element key="src" value="PixelFederation\DoctrineGenericTypesBundle"/>
+        <element key="tests" value="PixelFederation\DoctrineGenericTypesBundle\Tests"/>
+        <element key="tests/TestApplication/src" value="PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication"/>
+      </property>
+    </properties>
+  </rule>
+
+  <rule ref="SlevomatCodingStandard.Files.LineLength.LineTooLong">
+    <exclude-pattern>tests/</exclude-pattern>
+  </rule>
+
+  <rule ref="SlevomatCodingStandard.Arrays.AlphabeticallySortedByKeys.IncorrectKeyOrder">
+    <exclude-pattern>tests/</exclude-pattern>
+  </rule>
+
+  <rule ref="SlevomatCodingStandard.Functions.FunctionLength">
+    <exclude-pattern>tests/</exclude-pattern>
+  </rule>
+
+  <rule ref="SlevomatCodingStandard.PHP.UselessParentheses">
+    <properties>
+      <property name="enableCheckAroundNew" value="false"/>
+    </properties>
+  </rule>
+</ruleset>

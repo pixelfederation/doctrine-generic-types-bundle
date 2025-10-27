@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<psalm
+  errorLevel="1"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="https://getpsalm.org/schema/config"
+  xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
+  autoloader="./vendor/autoload.php"
+>
+  <projectFiles>
+    <directory name="src" />
+  </projectFiles>
+  <issueHandlers>
+    <MissingConstructor errorLevel="suppress"/>
+    <UnusedClass errorLevel="suppress"/>
+    <PossiblyUnusedMethod errorLevel="suppress"/>
+    <PropertyNotSetInConstructor errorLevel="suppress"/>
+  </issueHandlers>
+</psalm>

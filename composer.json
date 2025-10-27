@@ -1,0 +1,63 @@
+{
+  "name": "pixelfederation/doctrine-generic-types-bundle",
+  "description": "Symfony bundle for Doctrine Generic Types.",
+  "license": "MIT",
+  "type": "symfony-bundle",
+  "version": "1.0.0",
+  "authors": [
+    {
+      "name": "Martin Škorupa",
+      "email": "majoskorec@gmail.com"
+    }
+  ],
+  "homepage": "https://github.com/pixelfederation/doctrine-generic-types-bundle",
+  "require": {
+    "php": "^8.3",
+    "composer/class-map-generator": "^1.6",
+    "doctrine/dbal": "^3",
+    "doctrine/doctrine-bundle": "^2.16",
+    "doctrine/orm": "^3.5",
+    "symfony/dotenv": "^7.3",
+    "symfony/expression-language": "^7.3",
+    "symfony/http-kernel": "^7.3",
+    "symfony/yaml": "^7.3"
+  },
+  "require-dev": {
+    "dama/doctrine-test-bundle": "^8.4",
+    "ergebnis/composer-normalize": "^2.48",
+    "friendsofphp/php-cs-fixer": "^3.89",
+    "jms/serializer": "^3.32",
+    "matthiasnoback/symfony-dependency-injection-test": "^6.1",
+    "php-parallel-lint/php-parallel-lint": "^1.4",
+    "phpmd/phpmd": "^2.15",
+    "phpro/grumphp": "^2.17",
+    "phpstan/phpstan": "^2.1",
+    "pixelfederation/coding-standards": "^5.0",
+    "psalm/phar": "^6.13",
+    "ramsey/uuid": "^4.9",
+    "roave/security-advisories": "dev-latest",
+    "symfony/phpunit-bridge": "^7.3",
+    "symfony/test-pack": "^1.2"
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true,
+  "autoload": {
+    "psr-4": {
+      "PixelFederation\\DoctrineGenericTypesBundle\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "PixelFederation\\DoctrineGenericTypesBundle\\Tests\\": "tests/",
+      "PixelFederation\\DoctrineGenericTypesBundle\\Tests\\TestApplication\\": "tests/TestApplication/src/"
+    }
+  },
+  "config": {
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true,
+      "ergebnis/composer-normalize": true,
+      "phpro/grumphp": true
+    },
+    "sort-packages": true
+  }
+}

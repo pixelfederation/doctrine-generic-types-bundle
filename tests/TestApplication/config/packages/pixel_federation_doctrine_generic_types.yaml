@@ -1,0 +1,12 @@
+pixel_federation_doctrine_generic_types:
+  generic_types:
+    PixelFederation\DoctrineGenericTypesBundle\Value\BooleanValue: PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\BooleanValueType
+    PixelFederation\DoctrineGenericTypesBundle\Value\FloatValue: PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\FloatValueType
+    PixelFederation\DoctrineGenericTypesBundle\Value\IntegerValue: PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\IntegerValueType
+    PixelFederation\DoctrineGenericTypesBundle\Value\StringValue: PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\StringValueType
+    PixelFederation\DoctrineGenericTypesBundle\Bridge\RamseyUuid\Value\UuidValue: PixelFederation\DoctrineGenericTypesBundle\Bridge\RamseyUuid\Doctrine\Type\UuidValueType
+    PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\CustomValue\MoneyValue: PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Doctrine\Type\MoneyValueType
+  directories:
+    - ./tests/TestApplication/src/Value
+    - ./tests/TestApplication/src/OtherValue
+    - ./tests/TestApplication/src/CustomValue

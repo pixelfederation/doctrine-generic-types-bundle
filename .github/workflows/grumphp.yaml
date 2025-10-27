@@ -1,0 +1,48 @@
+name: Grumphp
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  composer-grumphp:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      matrix:
+        php-version: [ '8.3', '8.4' ]
+#        symfony-version: [ '7.3.*' ]
+
+    steps:
+      - name: Checkout current repo
+        uses: actions/checkout@v5
+
+      - name: Setup .env file
+        run: echo "php-container=generics-php$(echo "${{ matrix.php-version }}" | tr -d '.')" >> $GITHUB_ENV
+
+      - name: Start containers
+        run: docker compose -f "compose.yaml" up -d ${{ env.php-container }}
+
+      - name: Check PHP Version
+        run: docker exec ${{ env.php-container }} php -v
+
+      - name: Validate composer.json
+        run: docker exec ${{ env.php-container }} composer validate --strict --no-check-lock
+
+#      - name: Symfony version
+#        run: docker exec ${{ env.php-container }} composer config extra.symfony.require ${{ matrix.symfony-version }}
+
+      - name: Composer update
+        run: docker exec ${{ env.php-container }} composer update --prefer-dist --no-interaction
+
+      - name: Run static analysis (GrumPHP)
+        run: docker exec ${{ env.php-container }} php vendor/bin/grumphp run --testsuite=php${{ matrix.php-version }}
+
+      - name: Stop containers
+        if: always()
+        run: docker compose -f "docker-compose-base.yaml" down -v

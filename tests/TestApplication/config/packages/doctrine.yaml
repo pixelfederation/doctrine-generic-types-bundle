@@ -1,0 +1,15 @@
+doctrine:
+  dbal:
+    url: sqlite:///%kernel.project_dir%/var/sqlite/app.db
+    use_savepoints: true
+    types:
+      PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\ValueWithoutGenericType\HeightInCm: PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Doctrine\Type\HeightInCmType
+  orm:
+    auto_mapping: true
+    mappings:
+      Entity:
+        is_bundle: false
+        type: attribute
+        dir: '%kernel.project_dir%/src/Entity'
+        prefix: 'PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Entity'
+        alias: Entity

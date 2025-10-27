@@ -1,0 +1,25 @@
+services:
+  pixel_federation.doctrine_generic_types.connection_factory:
+    class: PixelFederation\DoctrineGenericTypesBundle\Doctrine\Connection\ConnectionFactory
+    decorates: 'doctrine.dbal.connection_factory'
+    arguments:
+      $connectionFactory: '@.inner'
+      $genericTypesRegistrator: '@pixel_federation.doctrine_generic_types.generic_types_registrator'
+
+  pixel_federation.doctrine_generic_types.default_type_registry_provider:
+    class: PixelFederation\DoctrineGenericTypesBundle\Doctrine\TypeRegistry\DefaultTypeRegistryProvider
+
+  PixelFederation\DoctrineGenericTypesBundle\Doctrine\TypeRegistry\TypeRegistryProviderInterface:
+    alias: pixel_federation.doctrine_generic_types.default_type_registry_provider
+
+  pixel_federation.doctrine_generic_types.generic_types_registrator:
+    class: PixelFederation\DoctrineGenericTypesBundle\Doctrine\TypeRegistry\GenericTypesRegistrator
+    autoconfigure: true
+    autowire: true
+    arguments:
+      $genericTypesMapping: '%pixel_federation.doctrine_generic_types.generic_types_mapping%'
+
+  pixel_federation.doctrine_generic_types.command.list:
+    class: PixelFederation\DoctrineGenericTypesBundle\Command\ListCommand
+    autoconfigure: true
+    autowire: true

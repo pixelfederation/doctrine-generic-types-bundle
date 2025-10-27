@@ -1,0 +1,9 @@
+composer.lock
+.idea
+vendor/
+.phpunit.cache
+tests/TestApplication/var/cache
+!/tests/TestApplication/var/cache/.gitkeep
+tests/TestApplication/var/sqlite
+!/tests/TestApplication/var/sqlite/.gitkeep
+.php-cs-fixer.cache
