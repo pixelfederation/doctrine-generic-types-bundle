@@ -45,4 +45,4 @@ jobs:
 
       - name: Stop containers
         if: always()
-        run: docker compose -f "docker-compose-base.yaml" down -v
+        run: docker compose -f "compose.yaml" down -v
