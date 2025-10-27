@@ -142,10 +142,10 @@ final class PixelFederationDoctrineGenericTypesExtensionTest extends AbstractExt
         ]);
 
         $this->assertContainerBuilderHasParameter('pixel_federation.doctrine_generic_types.generic_types_mapping');
-        $this->assertContainerBuilderHasExactParameter(
-            'pixel_federation.doctrine_generic_types.generic_types_mapping',
-            $mapping,
-        );
+        $param = $this->container->getParameter('pixel_federation.doctrine_generic_types.generic_types_mapping');
+        ksort($param);
+        ksort($mapping);
+        self::assertSame($mapping, $param);
     }
 
     /**

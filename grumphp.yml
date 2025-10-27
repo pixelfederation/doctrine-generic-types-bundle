@@ -87,7 +87,8 @@ grumphp:
       configuration: 'phpstan.dist.neon'
       level: max
       memory_limit: "-1"
-      ignore_patterns: []
+      ignore_patterns:
+        - tests/
       triggered_by: [ 'php' ]
     phpunitbridge: ~
     psalm:
