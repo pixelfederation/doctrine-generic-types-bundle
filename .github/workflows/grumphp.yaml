@@ -20,7 +20,7 @@ jobs:
 
     steps:
       - name: Checkout current repo
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Setup .env file
         run: echo "php-container=generics-php${{ matrix.php-version }}" >> $GITHUB_ENV
