@@ -1,0 +1,51 @@
+name: Coverage
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  phpunit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout current repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Start container
+        run: docker compose -f compose.yaml up -d generics-php-min
+
+      - name: Install dependencies
+        run: >-
+          docker exec generics-php-min composer update
+          --prefer-dist
+          --no-interaction
+          --no-progress
+
+      - name: Run PHPUnit with coverage
+        run: >-
+          docker exec
+          -e XDEBUG_MODE=coverage
+          generics-php-min
+          php vendor/bin/phpunit
+          --coverage-clover=coverage.xml
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac # v5.5.5
+        with:
+          files: ./coverage.xml
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: true
+
+      - name: Stop container
+        if: always()
+        run: docker compose -f compose.yaml down -v

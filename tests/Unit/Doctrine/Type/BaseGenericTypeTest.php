@@ -34,11 +34,14 @@ final class BaseGenericTypeTest extends TestCase
 {
     public function testNullConversion(): void
     {
-        $type = StringValueType::createForValue(FirstName::class);
         $platform = new SQLitePlatform();
 
+        $type = StringValueType::createForValue(FirstName::class);
         self::assertNull($type->convertToDatabaseValue(null, $platform));
         self::assertNull($type->convertToPHPValue(null, $platform));
+
+        $booleanType = BooleanValueType::createForValue(IsActive::class);
+        self::assertNull($booleanType->convertToDatabaseValue(null, $platform));
     }
 
     public function testInvalidPHPValueConversion(): void

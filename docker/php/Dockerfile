@@ -3,6 +3,7 @@ FROM php:${PHP_VERSION}-cli
 
 RUN apt-get update && apt-get install -y git-core zlib1g-dev libzip-dev zip unzip
 RUN docker-php-ext-install zip
+RUN pecl install xdebug-3.5.3 && docker-php-ext-enable xdebug
 
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" && \
     php -r "if (hash_file('SHA384', 'composer-setup.php') === trim(file_get_contents('https://composer.github.io/installer.sig'))) { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;" && \

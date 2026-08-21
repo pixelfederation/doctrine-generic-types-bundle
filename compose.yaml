@@ -4,6 +4,7 @@ x-php-common: &php_common
     - .:/srv/www:delegated
   environment:
     COMPOSER_MEMORY_LIMIT: -1
+    XDEBUG_MODE: off
 
 x-php-build: &php_build
   context: ./

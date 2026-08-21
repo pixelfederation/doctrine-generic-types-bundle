@@ -10,7 +10,6 @@ use PixelFederation\DoctrineGenericTypesBundle\DependencyInjection\Configuration
 use PixelFederation\DoctrineGenericTypesBundle\DependencyInjection\PixelFederationDoctrineGenericTypesExtension;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\TypeRegistry\DefaultTypeRegistryProvider;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\TypeRegistry\GenericTypesRegistrator;
-use PixelFederation\DoctrineGenericTypesBundle\Doctrine\TypeRegistry\TypeRegistryProviderInterface;
 use PixelFederation\DoctrineGenericTypesBundle\PixelFederationDoctrineGenericTypesBundle;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\CustomValue\Currency;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\CustomValue\Price;
@@ -32,7 +31,6 @@ use Symfony\Component\Console\Tester\CommandTester;
 
 #[CoversClass(GenericTypesRegistrator::class)]
 #[CoversClass(DefaultTypeRegistryProvider::class)]
-#[CoversClass(TypeRegistryProviderInterface::class)]
 #[CoversClass(Configuration::class)]
 #[CoversClass(PixelFederationDoctrineGenericTypesExtension::class)]
 #[CoversClass(PixelFederationDoctrineGenericTypesBundle::class)]

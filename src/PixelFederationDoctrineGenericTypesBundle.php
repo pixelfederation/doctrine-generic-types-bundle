@@ -10,7 +10,10 @@ use PixelFederation\DoctrineGenericTypesBundle\Doctrine\TypeRegistry\GenericType
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 /**
+ * Symfony 7.4 initializes the inherited bundle properties lazily.
+ *
  * @psalm-suppress DeprecatedInterface
+ * @psalm-suppress MissingConstructor
  */
 final class PixelFederationDoctrineGenericTypesBundle extends Bundle
 {
