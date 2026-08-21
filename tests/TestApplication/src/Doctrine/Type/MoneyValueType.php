@@ -76,26 +76,43 @@ final class MoneyValueType extends JsonType implements GenericType
         }
 
         if (!is_string($value)) {
-            throw InvalidType::new($value, $this->getName(), ['null', 'string']);
+            throw InvalidType::new($value, $this->class, ['null', 'string']);
         }
 
-        try {
-            $data = json_decode($value, true, 512, JSON_THROW_ON_ERROR);
-            assert(is_array($data));
-        } catch (JsonException $e) {
-            throw ValueNotConvertible::new($value, $this->getName(), $e->getMessage(), $e);
-        }
+        $data = $this->decode($value);
 
         $dataValue = $data['value'] ?? null;
         $dataCurrency = Currency::tryFrom($data['currency'] ?? null);
         if (!is_float($dataValue) || $dataCurrency === null) {
             throw InvalidFormat::new(
                 $value,
-                $this->getName(),
+                $this->class,
                 '{"value": float, "currency": enumString}',
             );
         }
 
         return new ($this->class)($dataValue, $dataCurrency);
+    }
+
+    /**
+     * @return array<array-key, mixed>
+     */
+    private function decode(string $value): array
+    {
+        try {
+            $data = json_decode($value, true, 512, JSON_THROW_ON_ERROR);
+        } catch (JsonException $e) {
+            throw ValueNotConvertible::new($value, $this->class, $e->getMessage(), $e);
+        }
+
+        if (!is_array($data)) {
+            throw InvalidFormat::new(
+                $value,
+                $this->class,
+                '{"value": float, "currency": enumString}',
+            );
+        }
+
+        return $data;
     }
 }

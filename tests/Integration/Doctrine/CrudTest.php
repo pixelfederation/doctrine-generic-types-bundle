@@ -74,6 +74,7 @@ final class CrudTest extends KernelTestCase
         );
         $entityManager->persist($newFoo);
         $entityManager->flush();
+        $entityManager->clear();
 
         $all = $entityManager->getRepository(Foo::class)->findAll();
         self::assertCount(1, $all);
@@ -96,6 +97,7 @@ final class CrudTest extends KernelTestCase
         $fooFromDb->count = $updatedCount;
         $fooFromDb->price = $updatedPrice;
         $entityManager->flush();
+        $entityManager->clear();
 
         $updatedFoo = $entityManager->getRepository(Foo::class)->find($userId);
         self::assertEquals($updatedCount, $updatedFoo->count);

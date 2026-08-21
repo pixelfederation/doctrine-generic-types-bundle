@@ -59,5 +59,8 @@
       "symfony/flex": true
     },
     "sort-packages": true
+  },
+  "scripts": {
+    "generate:coverage": "XDEBUG_MODE=coverage phpunit --coverage-html coverage"
   }
 }
