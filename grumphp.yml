@@ -5,8 +5,7 @@ grumphp:
   git_hook_variables:
     EXEC_GRUMPHP_COMMAND: './bin/grumphp_hooks/environment_spinup && docker exec -i generics-php-min'
   parallel:
-    enabled: true
-    max_workers: 4
+    enabled: false
   stop_on_failure: false
   process_timeout: 1800
   fixer:

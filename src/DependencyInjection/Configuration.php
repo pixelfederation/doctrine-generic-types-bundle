@@ -12,6 +12,7 @@ final class Configuration implements ConfigurationInterface
 {
     public const string CONFIGURATION_ROOT_NODE = 'pixel_federation_doctrine_generic_types';
 
+    /** @return TreeBuilder<'array'> */
     #[Override]
     public function getConfigTreeBuilder(): TreeBuilder
     {
