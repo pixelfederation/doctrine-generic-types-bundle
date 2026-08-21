@@ -11,32 +11,32 @@
   ],
   "homepage": "https://github.com/pixelfederation/doctrine-generic-types-bundle",
   "require": {
-    "php": "^8.3",
+    "php": "^8.5",
     "composer/class-map-generator": "^1.6",
-    "doctrine/dbal": "^3",
-    "doctrine/doctrine-bundle": "^2.16",
-    "doctrine/orm": "^3.5",
-    "symfony/dotenv": "^7.3",
-    "symfony/expression-language": "^7.3",
-    "symfony/http-kernel": "^7.3",
-    "symfony/yaml": "^7.3"
+    "doctrine/dbal": "^4.4",
+    "doctrine/doctrine-bundle": "^3.3",
+    "symfony/http-kernel": "^7.4 || ^8.1"
   },
   "require-dev": {
     "dama/doctrine-test-bundle": "^8.4",
+    "doctrine/orm": "^3.5",
     "ergebnis/composer-normalize": "^2.48",
     "friendsofphp/php-cs-fixer": "^3.89",
-    "jms/serializer": "^3.32",
     "matthiasnoback/symfony-dependency-injection-test": "^6.1",
     "php-parallel-lint/php-parallel-lint": "^1.4",
-    "phpmd/phpmd": "^2.15",
     "phpro/grumphp": "^2.17",
     "phpstan/phpstan": "^2.1",
+    "phpunit/phpunit": "^13.3",
     "pixelfederation/coding-standards": "^5.0",
     "psalm/phar": "^6.13",
     "ramsey/uuid": "^4.9",
     "roave/security-advisories": "dev-latest",
-    "symfony/phpunit-bridge": "^7.3",
-    "symfony/test-pack": "^1.2"
+    "symfony/dotenv": "^7.4 || ^8.1",
+    "symfony/flex": "^2.11",
+    "symfony/phpunit-bridge": "^7.4 || ^8.1"
+  },
+  "suggest": {
+    "ramsey/uuid": "Required when using the Ramsey UUID value and Doctrine type bridge."
   },
   "minimum-stability": "stable",
   "prefer-stable": true,
@@ -55,7 +55,8 @@
     "allow-plugins": {
       "dealerdirect/phpcodesniffer-composer-installer": true,
       "ergebnis/composer-normalize": true,
-      "phpro/grumphp": true
+      "phpro/grumphp": true,
+      "symfony/flex": true
     },
     "sort-packages": true
   }

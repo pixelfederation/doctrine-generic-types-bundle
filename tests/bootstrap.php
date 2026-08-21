@@ -10,10 +10,9 @@ require dirname(__DIR__) . '/vendor/autoload.php';
 
 set_exception_handler([new ErrorHandler(), 'handleException']);
 
-(new Dotenv())->usePutenv()->bootEnv(dirname(__DIR__) . '/.env.test');
-(new Filesystem())->remove(dirname(__DIR__) . '/tests/TestApplication/var/cache');
+new Dotenv()->usePutenv()->bootEnv(dirname(__DIR__) . '/.env.test');
+new Filesystem()->remove(dirname(__DIR__) . '/tests/TestApplication/var/cache');
 
-// phpcs:ignore SlevomatCodingStandard.Variables.DisallowSuperGlobalVariable.DisallowedSuperGlobalVariable
-if ($_SERVER['APP_DEBUG']) {
+if (getenv('APP_DEBUG')) {
     umask(0000);
 }

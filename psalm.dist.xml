@@ -10,9 +10,8 @@
     <directory name="src" />
   </projectFiles>
   <issueHandlers>
-    <MissingConstructor errorLevel="suppress"/>
+    <MixedAssignment errorLevel="suppress"/>
     <UnusedClass errorLevel="suppress"/>
     <PossiblyUnusedMethod errorLevel="suppress"/>
-    <PropertyNotSetInConstructor errorLevel="suppress"/>
   </issueHandlers>
 </psalm>

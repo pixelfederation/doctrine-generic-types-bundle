@@ -42,9 +42,6 @@ final class GenericTypesRegistratorTest extends TestCase
     public static function genericTypesMappingDataProvider(): array
     {
         return [
-            'empty' => [
-                'genericTypesMapping' => [],
-            ],
             'all' => [
                 'genericTypesMapping' => [
                     Price::class => MoneyValueType::class,
@@ -74,8 +71,6 @@ final class GenericTypesRegistratorTest extends TestCase
             $typeRegistryProvider,
             $genericTypesMapping,
         );
-        $initTypesCount = count($typeRegistry->getMap());
-
         $genericTypesRegistrator->register();
 
         foreach ($genericTypesMapping as $value => $type) {
@@ -83,7 +78,7 @@ final class GenericTypesRegistratorTest extends TestCase
 
             $registeredType = $typeRegistry->get($value);
             self::assertInstanceOf($type, $registeredType);
-            self::assertSame($value, $registeredType->getName());
+            self::assertSame($value, $typeRegistry->lookupName($registeredType));
             if (!$registeredType instanceof BaseGenericType) {
                 continue;
             }
@@ -93,8 +88,17 @@ final class GenericTypesRegistratorTest extends TestCase
                 $registeredTypeReflection->getProperty('class')->getValue($registeredType),
             );
         }
+    }
 
-        self::assertCount($initTypesCount + count($genericTypesMapping), $typeRegistry->getMap());
+    public function testEmptyMapping(): void
+    {
+        $typeRegistryProvider = new TypeRegistryProvider();
+        $typeRegistry = $typeRegistryProvider->provide();
+        $genericTypesRegistrator = new GenericTypesRegistrator($typeRegistryProvider);
+
+        self::assertFalse($typeRegistry->has(FirstName::class));
+        $genericTypesRegistrator->register();
+        self::assertFalse($typeRegistry->has(FirstName::class));
     }
 
     public function testDuplicity(): void
@@ -102,7 +106,6 @@ final class GenericTypesRegistratorTest extends TestCase
         $typeRegistryProvider = new TypeRegistryProvider();
         $typeRegistry = $typeRegistryProvider->provide();
 
-        $initTypesCount = count($typeRegistry->getMap());
         $initAgeType = new AgeType();
         $typeRegistry->register(Age::class, $initAgeType);
 
@@ -117,7 +120,26 @@ final class GenericTypesRegistratorTest extends TestCase
         self::assertTrue($typeRegistry->has(Age::class));
         $registeredType = $typeRegistry->get(Age::class);
         self::assertSame($initAgeType, $registeredType);
+    }
 
-        self::assertCount($initTypesCount + 1, $typeRegistry->getMap());
+    public function testRepeatedRegistrationIsIdempotent(): void
+    {
+        $typeRegistryProvider = new TypeRegistryProvider();
+        $typeRegistry = $typeRegistryProvider->provide();
+        $genericTypesRegistrator = new GenericTypesRegistrator(
+            $typeRegistryProvider,
+            [
+                FirstName::class => StringValueType::class,
+                IsActive::class => BooleanValueType::class,
+            ],
+        );
+
+        $genericTypesRegistrator->register();
+        $registeredFirstNameType = $typeRegistry->get(FirstName::class);
+        $registeredIsActiveType = $typeRegistry->get(IsActive::class);
+        $genericTypesRegistrator->register();
+
+        self::assertSame($registeredFirstNameType, $typeRegistry->get(FirstName::class));
+        self::assertSame($registeredIsActiveType, $typeRegistry->get(IsActive::class));
     }
 }

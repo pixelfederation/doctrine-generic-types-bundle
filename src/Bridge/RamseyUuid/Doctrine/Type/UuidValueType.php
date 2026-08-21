@@ -15,11 +15,6 @@ use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\BaseGenericType;
 final class UuidValueType extends BaseGenericType
 {
     /**
-     * @psalm-suppress InvalidClassConstantType
-     */
-    protected const string ABSTRACT_VALUE = UuidValue::class;
-
-    /**
      * @inheritDoc
      */
     #[Override]
@@ -29,5 +24,14 @@ final class UuidValueType extends BaseGenericType
         $column['fixed'] = true;
 
         return $platform->getStringTypeDeclarationSQL($column);
+    }
+
+    /**
+     * @return class-string<UuidValue>
+     */
+    #[Override]
+    protected static function getAbstractValueClass(): string
+    {
+        return UuidValue::class;
     }
 }

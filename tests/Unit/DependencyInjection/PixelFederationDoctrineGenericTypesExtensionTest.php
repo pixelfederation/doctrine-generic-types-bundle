@@ -30,6 +30,7 @@ use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\IsExp
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\LastName;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\SuccessRate;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\UserId;
+use PixelFederation\DoctrineGenericTypesBundle\Value\BaseValue;
 use PixelFederation\DoctrineGenericTypesBundle\Value\BooleanValue;
 use PixelFederation\DoctrineGenericTypesBundle\Value\FloatValue;
 use PixelFederation\DoctrineGenericTypesBundle\Value\IntegerValue;
@@ -117,6 +118,30 @@ final class PixelFederationDoctrineGenericTypesExtensionTest extends AbstractExt
                     LastName::class => StringValueType::class,
                     Amount::class => IntegerValueType::class,
                     UserId::class => UuidValueType::class,
+                ],
+            ],
+            'last_matching_generic_type_wins' => [
+                'genericTypes' => [
+                    BaseValue::class => BooleanValueType::class,
+                    IntegerValue::class => IntegerValueType::class,
+                ],
+                'directories' => [
+                    './tests/TestApplication/src/OtherValue',
+                ],
+                'mapping' => [
+                    Age::class => IntegerValueType::class,
+                ],
+            ],
+            'mapping_priority_follows_configuration_order' => [
+                'genericTypes' => [
+                    IntegerValue::class => IntegerValueType::class,
+                    BaseValue::class => BooleanValueType::class,
+                ],
+                'directories' => [
+                    './tests/TestApplication/src/OtherValue',
+                ],
+                'mapping' => [
+                    Age::class => BooleanValueType::class,
                 ],
             ],
         ];

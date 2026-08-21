@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Doctrine\Type;
 
 use Doctrine\DBAL\Platforms\AbstractPlatform;
-use Doctrine\DBAL\Types\ConversionException;
+use Doctrine\DBAL\Types\Exception\InvalidFormat;
+use Doctrine\DBAL\Types\Exception\InvalidType;
+use Doctrine\DBAL\Types\Exception\SerializationFailed;
+use Doctrine\DBAL\Types\Exception\ValueNotConvertible;
 use Doctrine\DBAL\Types\JsonType;
 use Doctrine\DBAL\Types\Type;
 use InvalidArgumentException;
@@ -40,12 +43,6 @@ final class MoneyValueType extends JsonType implements GenericType
     }
 
     #[Override]
-    public function getName(): string
-    {
-        return $this->class;
-    }
-
-    #[Override]
     public function convertToDatabaseValue(mixed $value, AbstractPlatform $platform): ?string
     {
         if ($value === null) {
@@ -54,9 +51,9 @@ final class MoneyValueType extends JsonType implements GenericType
 
         $class = $this->class;
         if (!$value instanceof $class) {
-            throw ConversionException::conversionFailedInvalidType(
+            throw InvalidType::new(
                 $value,
-                $this->getName(),
+                $class,
                 ['null', $class],
             );
         }
@@ -64,7 +61,7 @@ final class MoneyValueType extends JsonType implements GenericType
         try {
             return json_encode(['value' => $value->value, 'currency' => $value->currency->name], JSON_THROW_ON_ERROR);
         } catch (JsonException $e) {
-            throw ConversionException::conversionFailedSerialization($value, 'json', $e->getMessage());
+            throw SerializationFailed::new($value, 'json', $e->getMessage(), $e);
         }
     }
 
@@ -79,20 +76,20 @@ final class MoneyValueType extends JsonType implements GenericType
         }
 
         if (!is_string($value)) {
-            throw ConversionException::conversionFailedFormat($value, $this->getName(), 'json');
+            throw InvalidType::new($value, $this->getName(), ['null', 'string']);
         }
 
         try {
             $data = json_decode($value, true, 512, JSON_THROW_ON_ERROR);
             assert(is_array($data));
         } catch (JsonException $e) {
-            throw ConversionException::conversionFailedUnserialization($value, $e->getMessage());
+            throw ValueNotConvertible::new($value, $this->getName(), $e->getMessage(), $e);
         }
 
         $dataValue = $data['value'] ?? null;
         $dataCurrency = Currency::tryFrom($data['currency'] ?? null);
         if (!is_float($dataValue) || $dataCurrency === null) {
-            throw ConversionException::conversionFailedFormat(
+            throw InvalidFormat::new(
                 $value,
                 $this->getName(),
                 '{"value": float, "currency": enumString}',
@@ -100,11 +97,5 @@ final class MoneyValueType extends JsonType implements GenericType
         }
 
         return new ($this->class)($dataValue, $dataCurrency);
-    }
-
-    #[Override]
-    public function requiresSQLCommentHint(AbstractPlatform $platform): bool
-    {
-        return false;
     }
 }

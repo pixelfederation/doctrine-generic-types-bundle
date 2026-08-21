@@ -14,16 +14,20 @@ use PixelFederation\DoctrineGenericTypesBundle\Value\FloatValue;
 final class FloatValueType extends BaseGenericType
 {
     /**
-     * @psalm-suppress InvalidClassConstantType
-     */
-    protected const string ABSTRACT_VALUE = FloatValue::class;
-
-    /**
      * @inheritdoc
      */
     #[Override]
     public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
     {
         return $platform->getFloatDeclarationSQL($column);
+    }
+
+    /**
+     * @return class-string<FloatValue>
+     */
+    #[Override]
+    protected static function getAbstractValueClass(): string
+    {
+        return FloatValue::class;
     }
 }

@@ -15,11 +15,6 @@ use PixelFederation\DoctrineGenericTypesBundle\Value\BooleanValue;
 final class BooleanValueType extends BaseGenericType
 {
     /**
-     * @psalm-suppress InvalidClassConstantType
-     */
-    protected const string ABSTRACT_VALUE = BooleanValue::class;
-
-    /**
      * @inheritdoc
      */
     #[Override]
@@ -31,15 +26,12 @@ final class BooleanValueType extends BaseGenericType
     #[Override]
     public function convertToDatabaseValue(mixed $value, AbstractPlatform $platform): mixed
     {
-        /**
-         * @psalm-suppress MixedAssignment
-         */
         $dbValue = parent::convertToDatabaseValue($value, $platform);
         if ($dbValue === null) {
             return null;
         }
 
-        return $platform->convertBooleans($dbValue);
+        return $platform->convertBooleansToDatabaseValue($dbValue);
     }
 
     #[Override]
@@ -49,8 +41,17 @@ final class BooleanValueType extends BaseGenericType
     }
 
     #[Override]
-    public function getBindingType(): int
+    public function getBindingType(): ParameterType
     {
         return ParameterType::BOOLEAN;
+    }
+
+    /**
+     * @return class-string<BooleanValue>
+     */
+    #[Override]
+    protected static function getAbstractValueClass(): string
+    {
+        return BooleanValue::class;
     }
 }

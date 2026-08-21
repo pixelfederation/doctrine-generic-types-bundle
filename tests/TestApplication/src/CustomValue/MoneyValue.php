@@ -6,11 +6,11 @@ namespace PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Custo
 
 use PixelFederation\DoctrineGenericTypesBundle\Value\Value;
 
-abstract class MoneyValue implements Value
+abstract readonly class MoneyValue implements Value
 {
     public function __construct(
-        public readonly float $value,
-        public readonly Currency $currency,
+        public float $value,
+        public Currency $currency,
     ) {
     }
 }

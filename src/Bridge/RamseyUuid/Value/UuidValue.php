@@ -17,7 +17,7 @@ use Stringable;
  * @implements BaseValue<UuidInterface>
  * @psalm-consistent-constructor
  */
-abstract class UuidValue implements BaseValue, Stringable
+abstract readonly class UuidValue implements BaseValue, Stringable
 {
     public function __construct(
         protected UuidInterface $value,

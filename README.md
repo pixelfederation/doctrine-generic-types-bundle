@@ -1,6 +1,6 @@
 [![Grumphp](https://github.com/pixelfederation/doctrine-generic-types-bundle/actions/workflows/grumphp.yaml/badge.svg)](https://github.com/pixelfederation/doctrine-generic-types-bundle/actions/workflows/grumphp.yaml)
 [![Latest Version](https://img.shields.io/packagist/v/pixelfederation/doctrine-generic-types-bundle.svg)](https://packagist.org/packages/pixelfederation/doctrine-generic-types-bundle)
-[![Downloads](https://img.shields.io/packagist/dm/pixelfederation/doctrine-generic-types-bundley)](https://packagist.org/packages/pixelfederation/doctrine-generic-types-bundle)
+[![Downloads](https://img.shields.io/packagist/dm/pixelfederation/doctrine-generic-types-bundle)](https://packagist.org/packages/pixelfederation/doctrine-generic-types-bundle)
 
 [//]: # ([![Code Coverage]&#40;https://codecov.io/gh/pixelfederation/doctrine-generic-types-bundle/branch/master/graph/badge.svg?token=77JIFYSUC5&#41;]&#40;https://codecov.io/gh/pixelfederation/doctrine-generic-types-bundle&#41;)
 
@@ -8,13 +8,13 @@
 
 ## Installation
 
-install via Composer:
+Install via Composer:
 
 ```bash
 composer require pixelfederation/doctrine-generic-types-bundle
 ```
 
-register bundle in `config/bundles.php` (if you don't use Symfony Flex)
+Register the bundle in `config/bundles.php` if you don't use Symfony Flex:
 
 ```php
 return [
@@ -23,27 +23,48 @@ return [
 ];
 ```
 
-bundle configuration:
+Bundle configuration:
 
-```yaml
-# config/packages/pixel_federation_doctrine_generic_types.yaml
-pixel_federation_doctrine_generic_types:
-    generic_types:
-        PixelFederation\DoctrineGenericTypesBundle\Value\BooleanValue: PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\BooleanValueType
-        PixelFederation\DoctrineGenericTypesBundle\Value\FloatValue: PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\FloatValueType
-        PixelFederation\DoctrineGenericTypesBundle\Value\IntegerValue: PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\IntegerValueType
-        PixelFederation\DoctrineGenericTypesBundle\Value\StringValue: PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\StringValueType
-        # https://github.com/ramsey/uuid integration
-        PixelFederation\DoctrineGenericTypesBundle\Bridge\RamseyUuid\Value\UuidValue: PixelFederation\DoctrineGenericTypesBundle\Bridge\RamseyUuid\Doctrine\Type\UuidValueType
-    # Directories where to find your Value Objects
-    directories:
-        - ./src/App/Value
-        - ./src/App/OtherValue
+```php
+<?php
+
+// config/packages/pixel_federation_doctrine_generic_types.php
+
+declare(strict_types=1);
+
+use PixelFederation\DoctrineGenericTypesBundle\Bridge\RamseyUuid\Doctrine\Type\UuidValueType;
+use PixelFederation\DoctrineGenericTypesBundle\Bridge\RamseyUuid\Value\UuidValue;
+use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\BooleanValueType;
+use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\FloatValueType;
+use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\IntegerValueType;
+use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\StringValueType;
+use PixelFederation\DoctrineGenericTypesBundle\Value\BooleanValue;
+use PixelFederation\DoctrineGenericTypesBundle\Value\FloatValue;
+use PixelFederation\DoctrineGenericTypesBundle\Value\IntegerValue;
+use PixelFederation\DoctrineGenericTypesBundle\Value\StringValue;
+use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+
+return static function (ContainerConfigurator $container): void {
+    $container->extension('pixel_federation_doctrine_generic_types', [
+        'generic_types' => [
+            BooleanValue::class => BooleanValueType::class,
+            FloatValue::class => FloatValueType::class,
+            IntegerValue::class => IntegerValueType::class,
+            StringValue::class => StringValueType::class,
+            // Ramsey UUID integration (requires ramsey/uuid)
+            UuidValue::class => UuidValueType::class,
+        ],
+        'directories' => [
+            './src/App/Value',
+            './src/App/OtherValue',
+        ],
+    ]);
+};
 ```
 
 ## Usage
 
-Crete your Value Object:
+Create your Value Object:
 
 ```php
 <?php
@@ -54,7 +75,7 @@ namespace App\Value;
 
 use PixelFederation\DoctrineGenericTypesBundle\Value\StringValue;
 
-final class FirstName extends StringValue
+final readonly class FirstName extends StringValue
 {
 }
 ```
@@ -76,18 +97,21 @@ use App\Value\FirstName;
 class Person
 {
     public function __construct(
-        #[ORM\Column(type: FirstName::class)]
+        #[ORM\Column(type: FirstName::class, length: 255)]
         public FirstName $firstName,
     ) {
     }
 }
 ```
 
-doctrine will handle persisting and retrieving your Value Object automatically.
+Doctrine will handle persisting and retrieving your Value Object automatically.
+
+String-based generic types require an explicit column length because Doctrine ORM only provides the default
+length for its built-in `string` type.
 
 ## How to create custom Generic Types
 
-Create abstract Value class extending `PixelFederation\DoctrineGenericTypesBundle\Value\Value` or `PixelFederation\DoctrineGenericTypesBundle\Value\BaseValue`:
+Create an abstract value class implementing `PixelFederation\DoctrineGenericTypesBundle\Value\Value` or `PixelFederation\DoctrineGenericTypesBundle\Value\BaseValue`:
 
 ```php
 <?php
@@ -98,18 +122,18 @@ namespace App\CustomValue;
 
 use PixelFederation\DoctrineGenericTypesBundle\Value\Value;
 
-abstract class MoneyValue implements Value
+abstract readonly class MoneyValue implements Value
 {
     public function __construct(
-        public readonly float $value,
-        public readonly string $currency,
+        public float $value,
+        public string $currency,
     ) {
         // value object validation logic
     }
 }
 ```
 
-Create Doctrine Type class extending `PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\GenericType`:
+Create a Doctrine type class implementing `PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\GenericType`:
 
 ```php
 <?php
@@ -120,7 +144,10 @@ namespace App\Doctrine\Type;
 
 use App\CustomValue\MoneyValue;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
-use Doctrine\DBAL\Types\ConversionException;
+use Doctrine\DBAL\Types\Exception\InvalidFormat;
+use Doctrine\DBAL\Types\Exception\InvalidType;
+use Doctrine\DBAL\Types\Exception\SerializationFailed;
+use Doctrine\DBAL\Types\Exception\ValueNotConvertible;
 use Doctrine\DBAL\Types\JsonType;
 use Doctrine\DBAL\Types\Type;
 use InvalidArgumentException;
@@ -135,6 +162,7 @@ final class MoneyValueType extends JsonType implements GenericType
      */
     protected string $class;
 
+    #[Override]
     public static function createForValue(string $class): Type
     {
         if (!is_a($class, MoneyValue::class, true)) {
@@ -153,12 +181,6 @@ final class MoneyValueType extends JsonType implements GenericType
     }
 
     #[Override]
-    public function getName(): string
-    {
-        return $this->class;
-    }
-
-    #[Override]
     public function convertToDatabaseValue(mixed $value, AbstractPlatform $platform): ?string
     {
         if ($value === null) {
@@ -167,9 +189,9 @@ final class MoneyValueType extends JsonType implements GenericType
 
         $class = $this->class;
         if (!$value instanceof $class) {
-            throw ConversionException::conversionFailedInvalidType(
+            throw InvalidType::new(
                 $value,
-                $this->getName(),
+                $class,
                 ['null', $class],
             );
         }
@@ -177,12 +199,12 @@ final class MoneyValueType extends JsonType implements GenericType
         try {
             return json_encode(['value' => $value->value, 'currency' => $value->currency], JSON_THROW_ON_ERROR);
         } catch (JsonException $e) {
-            throw ConversionException::conversionFailedSerialization($value, 'json', $e->getMessage());
+            throw SerializationFailed::new($value, 'json', $e->getMessage(), $e);
         }
     }
 
     /**
-     * @return object<MoneyValue>|null
+     * @return MoneyValue|null
      */
     #[Override]
     public function convertToPHPValue(mixed $value, AbstractPlatform $platform): mixed
@@ -192,46 +214,61 @@ final class MoneyValueType extends JsonType implements GenericType
         }
 
         if (!is_string($value)) {
-            throw ConversionException::conversionFailedFormat($value, $this->getName(), 'json');
+            throw InvalidType::new($value, $this->class, ['null', 'string']);
         }
 
         try {
             $data = json_decode($value, true, 512, JSON_THROW_ON_ERROR);
-            assert(is_array($data));
         } catch (JsonException $e) {
-            throw ConversionException::conversionFailedUnserialization($value, $e->getMessage());
+            throw ValueNotConvertible::new($value, $this->class, $e->getMessage(), $e);
+        }
+
+        if (!is_array($data)) {
+            throw InvalidFormat::new(
+                $value,
+                $this->class,
+                '{"value": float, "currency": string}',
+            );
         }
 
         $dataValue = $data['value'] ?? null;
         $dataCurrency = $data['currency'] ?? null;
         if (!is_float($dataValue) || !is_string($dataCurrency)) {
-            throw ConversionException::conversionFailedFormat(
+            throw InvalidFormat::new(
                 $value,
-                $this->getName(),
+                $this->class,
                 '{"value": float, "currency": string}',
             );
         }
 
         return new ($this->class)($dataValue, $dataCurrency);
     }
-
-    #[Override]
-    public function requiresSQLCommentHint(AbstractPlatform $platform): bool
-    {
-        return false;
-    }
 }
 ```
 
 Register your custom Generic Type in the bundle configuration:
 
-```yaml
-# config/packages/pixel_federation_doctrine_generic_types.yaml
-pixel_federation_doctrine_generic_types:
-    generic_types:
-        # ...
-        App\CustomValue\MoneyValue: App\Doctrine\Type\MoneyValueType
-    directories:
-        # ...
-        - ./src/App/CustomValue
+```php
+<?php
+
+// config/packages/pixel_federation_doctrine_generic_types.php
+
+declare(strict_types=1);
+
+use App\CustomValue\MoneyValue;
+use App\Doctrine\Type\MoneyValueType;
+use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+
+return static function (ContainerConfigurator $container): void {
+    $container->extension('pixel_federation_doctrine_generic_types', [
+        'generic_types' => [
+            // ...
+            MoneyValue::class => MoneyValueType::class,
+        ],
+        'directories' => [
+            // ...
+            './src/App/CustomValue',
+        ],
+    ]);
+};
 ```

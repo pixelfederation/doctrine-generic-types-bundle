@@ -11,7 +11,7 @@ use PixelFederation\DoctrineGenericTypesBundle\Exception\InvalidDatabaseTypeExce
  * @implements BaseValue<bool>
  * @psalm-consistent-constructor
  */
-abstract class BooleanValue implements BaseValue
+abstract readonly class BooleanValue implements BaseValue
 {
     public function __construct(
         protected bool $value,

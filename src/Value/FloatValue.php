@@ -11,7 +11,7 @@ use PixelFederation\DoctrineGenericTypesBundle\Exception\InvalidDatabaseTypeExce
  * @implements BaseValue<float>
  * @psalm-consistent-constructor
  */
-abstract class FloatValue implements BaseValue
+abstract readonly class FloatValue implements BaseValue
 {
     public function __construct(
         protected float $value,

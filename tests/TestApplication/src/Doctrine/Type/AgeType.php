@@ -4,13 +4,23 @@ declare(strict_types=1);
 
 namespace PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Doctrine\Type;
 
+use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
-use Doctrine\DBAL\Types\IntegerType;
+use Doctrine\DBAL\Types\Type;
 use Override;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\OtherValue\Age;
 
-final class AgeType extends IntegerType
+final class AgeType extends Type
 {
+    /**
+     * @inheritDoc
+     */
+    #[Override]
+    public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
+    {
+        return $platform->getIntegerTypeDeclarationSQL($column);
+    }
+
     #[Override]
     public function convertToDatabaseValue(mixed $value, AbstractPlatform $platform): ?int
     {
@@ -32,8 +42,8 @@ final class AgeType extends IntegerType
     }
 
     #[Override]
-    public function getName(): string
+    public function getBindingType(): ParameterType
     {
-        return Age::class;
+        return ParameterType::INTEGER;
     }
 }

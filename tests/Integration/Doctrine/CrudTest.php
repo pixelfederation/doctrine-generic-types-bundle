@@ -8,10 +8,10 @@ use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PixelFederation\DoctrineGenericTypesBundle\DependencyInjection\Configuration;
 use PixelFederation\DoctrineGenericTypesBundle\DependencyInjection\PixelFederationDoctrineGenericTypesExtension;
-use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Connection\ConnectionFactory;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\TypeRegistry\DefaultTypeRegistryProvider;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\TypeRegistry\GenericTypesRegistrator;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\TypeRegistry\TypeRegistryProviderInterface;
+use PixelFederation\DoctrineGenericTypesBundle\PixelFederationDoctrineGenericTypesBundle;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\CustomValue\Currency;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\CustomValue\Price;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Entity\Foo;
@@ -30,12 +30,12 @@ use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Tester\CommandTester;
 
-#[CoversClass(ConnectionFactory::class)]
 #[CoversClass(GenericTypesRegistrator::class)]
 #[CoversClass(DefaultTypeRegistryProvider::class)]
 #[CoversClass(TypeRegistryProviderInterface::class)]
 #[CoversClass(Configuration::class)]
 #[CoversClass(PixelFederationDoctrineGenericTypesExtension::class)]
+#[CoversClass(PixelFederationDoctrineGenericTypesBundle::class)]
 final class CrudTest extends KernelTestCase
 {
     public function testCrud(): void

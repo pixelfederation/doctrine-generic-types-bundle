@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type;
 
 use Doctrine\DBAL\Platforms\AbstractPlatform;
-use Doctrine\DBAL\Types\ConversionException;
+use Doctrine\DBAL\Types\Exception\InvalidType;
 use Doctrine\DBAL\Types\Type;
 use InvalidArgumentException;
 use Override;
@@ -18,39 +18,24 @@ use PixelFederation\DoctrineGenericTypesBundle\Value\BaseValue;
  */
 abstract class BaseGenericType extends Type implements GenericType
 {
-    // phpcs:ignore SlevomatCodingStandard.TypeHints.UselessConstantTypeHint.UselessDocComment
     /**
      * @var class-string<V>
-     * @psalm-suppress InvalidConstantAssignmentValue
-     */
-    protected const string ABSTRACT_VALUE = BaseValue::class;
-
-    /**
-     * @var class-string<V>
+     * @psalm-suppress PropertyNotSetInConstructor
      */
     protected string $class;
 
     #[Override]
     public static function createForValue(string $class): Type
     {
-        if (static::class === self::class) {
-            throw new InvalidArgumentException(sprintf(
-                'You must set const ABSTRACT_VALUE at %s.',
-                static::class,
-            ));
-        }
-
-        if (!is_a($class, static::ABSTRACT_VALUE, true)) {
+        $abstractValueClass = static::getAbstractValueClass();
+        if (!is_a($class, $abstractValueClass, true)) {
             throw new InvalidArgumentException(sprintf(
                 'Doctrine Type %s must handle class %s. Got %s',
                 static::class,
-                static::ABSTRACT_VALUE,
+                $abstractValueClass,
                 $class,
             ));
         }
-        /**
-         * @phpstan-ignore function.alreadyNarrowedType
-         */
         assert(is_subclass_of($class, BaseValue::class));
 
         $self = new static();
@@ -68,9 +53,9 @@ abstract class BaseGenericType extends Type implements GenericType
 
         $class = $this->class;
         if (!$value instanceof $class) {
-            throw ConversionException::conversionFailedInvalidType(
+            throw InvalidType::new(
                 $value,
-                $this->getName(),
+                $class,
                 ['null', $class],
             );
         }
@@ -93,9 +78,8 @@ abstract class BaseGenericType extends Type implements GenericType
         }
     }
 
-    #[Override]
-    public function getName(): string
-    {
-        return $this->class;
-    }
+    /**
+     * @return class-string<V>
+     */
+    abstract protected static function getAbstractValueClass(): string;
 }

@@ -6,6 +6,6 @@ namespace PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value
 
 use PixelFederation\DoctrineGenericTypesBundle\Bridge\RamseyUuid\Value\UuidValue;
 
-final class UserId extends UuidValue
+final readonly class UserId extends UuidValue
 {
 }

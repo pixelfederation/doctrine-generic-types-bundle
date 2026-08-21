@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PixelFederation\DoctrineGenericTypesBundle\Exception;
 
 use Doctrine\DBAL\Types\ConversionException;
+use Doctrine\DBAL\Types\Exception\InvalidType;
 use InvalidArgumentException;
 use Override;
 
@@ -29,7 +30,7 @@ final class InvalidDatabaseTypeException extends InvalidArgumentException implem
     #[Override]
     public function toConversionException(): ConversionException
     {
-        return ConversionException::conversionFailedInvalidType(
+        return InvalidType::new(
             $this->dbValue,
             $this->typeName,
             $this->expectedTypes,

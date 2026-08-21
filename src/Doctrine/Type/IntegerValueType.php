@@ -15,11 +15,6 @@ use PixelFederation\DoctrineGenericTypesBundle\Value\IntegerValue;
 final class IntegerValueType extends BaseGenericType
 {
     /**
-     * @psalm-suppress InvalidClassConstantType
-     */
-    protected const string ABSTRACT_VALUE = IntegerValue::class;
-
-    /**
      * @inheritDoc
      */
     #[Override]
@@ -29,8 +24,17 @@ final class IntegerValueType extends BaseGenericType
     }
 
     #[Override]
-    public function getBindingType(): int
+    public function getBindingType(): ParameterType
     {
         return ParameterType::INTEGER;
+    }
+
+    /**
+     * @return class-string<IntegerValue>
+     */
+    #[Override]
+    protected static function getAbstractValueClass(): string
+    {
+        return IntegerValue::class;
     }
 }

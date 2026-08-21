@@ -8,7 +8,6 @@ use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\Type;
 use Override;
-use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\ValueWithoutGenericType\HeightInCm;
 
 final class HeightInCmType extends Type
 {
@@ -22,13 +21,7 @@ final class HeightInCmType extends Type
     }
 
     #[Override]
-    public function getName(): string
-    {
-        return HeightInCm::class;
-    }
-
-    #[Override]
-    public function getBindingType(): int
+    public function getBindingType(): ParameterType
     {
         return ParameterType::INTEGER;
     }
