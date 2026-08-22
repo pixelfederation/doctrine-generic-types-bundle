@@ -36,28 +36,43 @@ use PixelFederation\DoctrineGenericTypesBundle\Bridge\RamseyUuid\Doctrine\Type\U
 use PixelFederation\DoctrineGenericTypesBundle\Bridge\RamseyUuid\Value\UuidValue;
 use PixelFederation\DoctrineGenericTypesBundle\Bridge\SymfonyUid\Doctrine\Type\UuidValueType as SymfonyUuidValueType;
 use PixelFederation\DoctrineGenericTypesBundle\Bridge\SymfonyUid\Value\UuidValue as SymfonyUuidValue;
+use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\BigIntegerValueType;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\BooleanValueType;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\DateTimeValueType;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\DateValueType;
+use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\DecimalValueType;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\FloatValueType;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\IntegerValueType;
+use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\JsonSerializableValueType;
+use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\LongTextValueType;
+use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\NativeJsonValueType;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\StringValueType;
+use PixelFederation\DoctrineGenericTypesBundle\Value\BigIntegerValue;
 use PixelFederation\DoctrineGenericTypesBundle\Value\BooleanValue;
 use PixelFederation\DoctrineGenericTypesBundle\Value\DateTimeValue;
 use PixelFederation\DoctrineGenericTypesBundle\Value\DateValue;
+use PixelFederation\DoctrineGenericTypesBundle\Value\DecimalValue;
 use PixelFederation\DoctrineGenericTypesBundle\Value\FloatValue;
 use PixelFederation\DoctrineGenericTypesBundle\Value\IntegerValue;
+use PixelFederation\DoctrineGenericTypesBundle\Value\JsonSerializableValue;
+use PixelFederation\DoctrineGenericTypesBundle\Value\LongTextValue;
+use PixelFederation\DoctrineGenericTypesBundle\Value\NativeJsonValue;
 use PixelFederation\DoctrineGenericTypesBundle\Value\StringValue;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 
 return static function (ContainerConfigurator $container): void {
     $container->extension('pixel_federation_doctrine_generic_types', [
         'generic_types' => [
+            BigIntegerValue::class => BigIntegerValueType::class,
             BooleanValue::class => BooleanValueType::class,
             DateTimeValue::class => DateTimeValueType::class,
             DateValue::class => DateValueType::class,
+            DecimalValue::class => DecimalValueType::class,
             FloatValue::class => FloatValueType::class,
             IntegerValue::class => IntegerValueType::class,
+            JsonSerializableValue::class => JsonSerializableValueType::class,
+            LongTextValue::class => LongTextValueType::class,
+            NativeJsonValue::class => NativeJsonValueType::class,
             StringValue::class => StringValueType::class,
             // Ramsey UUID integration (requires ramsey/uuid)
             UuidValue::class => UuidValueType::class,
@@ -118,6 +133,74 @@ Doctrine will handle persisting and retrieving your Value Object automatically.
 
 String-based generic types require an explicit column length because Doctrine ORM only provides the default
 length for its built-in `string` type.
+
+## Built-in value types
+
+The bundle provides these base value classes and matching Doctrine types:
+
+| Value base | Doctrine type | PHP database value | Column options |
+| --- | --- | --- | --- |
+| `BooleanValue` | `BooleanValueType` | `bool` | — |
+| `IntegerValue` | `IntegerValueType` | `int` | — |
+| `BigIntegerValue` | `BigIntegerValueType` | `int|string` | — |
+| `FloatValue` | `FloatValueType` | `float` | — |
+| `DecimalValue` | `DecimalValueType` | numeric `string` | `precision` and `scale` |
+| `StringValue` | `StringValueType` | `string` | `length` |
+| `LongTextValue` | `LongTextValueType` | `string` | — |
+| `DateValue` | `DateValueType` | `DateTimeImmutable` | — |
+| `DateTimeValue` | `DateTimeValueType` | `DateTimeImmutable` | — |
+| `JsonSerializableValue` | `JsonSerializableValueType` | result of `jsonSerialize()` | — |
+| `NativeJsonValue` | `NativeJsonValueType` | `mixed` | — |
+
+`BigIntegerValue` accepts integers and numeric strings so that values outside PHP's integer range remain exact.
+`DecimalValue` accepts numeric strings to avoid floating-point precision loss. Decimal entity fields must declare
+their precision and scale, for example `#[ORM\Column(type: Price::class, precision: 10, scale: 2)]`.
+
+## JSON values
+
+Two JSON value bases are available. `JsonSerializableValue` is intended for structured value objects. It requires
+the concrete value to implement `jsonSerialize()` and `fromDbValue()`, making both serialization and hydration
+explicit:
+
+```php
+use Override;
+use PixelFederation\DoctrineGenericTypesBundle\Value\JsonSerializableValue;
+
+final readonly class Address extends JsonSerializableValue
+{
+    public function __construct(
+        public string $city,
+        public string $street,
+    ) {
+    }
+
+    #[Override]
+    public function jsonSerialize(): array
+    {
+        return ['city' => $this->city, 'street' => $this->street];
+    }
+
+    #[Override]
+    public static function fromDbValue(mixed $dbValue): static
+    {
+        // Validate the decoded JSON structure as required by the domain.
+        return new static($dbValue['city'], $dbValue['street']);
+    }
+}
+```
+
+`NativeJsonValue` stores any value accepted by Doctrine DBAL's JSON type. Doctrine serializes the value with
+`json_encode()` and decodes JSON objects into associative arrays when loading them. This is convenient for native
+arrays and scalar JSON values, but applications are responsible for ensuring that the value is JSON-serializable.
+
+Configure each hierarchy with its corresponding Doctrine type:
+
+```php
+'generic_types' => [
+    JsonSerializableValue::class => JsonSerializableValueType::class,
+    NativeJsonValue::class => NativeJsonValueType::class,
+],
+```
 
 ## Symfony UID bridge
 

@@ -41,6 +41,14 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
+- Added `BigIntegerValue` and `BigIntegerValueType` for Doctrine `BIGINT` mappings. Values are represented as
+  integers or numeric strings to preserve numbers outside PHP's integer range.
+- Added `DecimalValue` and `DecimalValueType` for exact Doctrine `DECIMAL` mappings backed by numeric strings.
+- Added `LongTextValue` and `LongTextValueType` for Doctrine `TEXT`/CLOB mappings without a string length limit.
+- Added two JSON mapping strategies. `JsonSerializableValue` and `JsonSerializableValueType` provide explicit
+  serialization through `JsonSerializable` and require concrete values to implement hydration through
+  `fromDbValue()`. `NativeJsonValue` and `NativeJsonValueType` delegate native PHP value serialization and
+  deserialization to Doctrine DBAL's JSON type.
 - Added immutable `DateValue` and `DateTimeValue` base classes together with `DateValueType` and
   `DateTimeValueType` for native Doctrine `DATE` and `DATETIME` mappings.
 - Added an optional Symfony UID bridge with a `UuidValue` base class. `UuidValueType` uses Symfony's native

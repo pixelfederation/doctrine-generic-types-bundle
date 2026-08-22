@@ -14,11 +14,16 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use PixelFederation\DoctrineGenericTypesBundle\Bridge\RamseyUuid\Doctrine\Type\UuidValueType;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\BaseGenericType;
+use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\BigIntegerValueType;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\BooleanValueType;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\DateTimeValueType;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\DateValueType;
+use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\DecimalValueType;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\FloatValueType;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\IntegerValueType;
+use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\JsonSerializableValueType;
+use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\LongTextValueType;
+use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\NativeJsonValueType;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\StringValueType;
 use PixelFederation\DoctrineGenericTypesBundle\Exception\InvalidDatabaseTypeException;
 use PixelFederation\DoctrineGenericTypesBundle\Exception\InvalidValueFormatException;
@@ -26,16 +31,26 @@ use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\Count
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\FirstName;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\IsActive;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\UserId;
+use PixelFederation\DoctrineGenericTypesBundle\Tests\Unit\Value\TestBigIntegerValue;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\Unit\Value\TestDateTimeValue;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\Unit\Value\TestDateValue;
+use PixelFederation\DoctrineGenericTypesBundle\Tests\Unit\Value\TestDecimalValue;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\Unit\Value\TestFloatValue;
+use PixelFederation\DoctrineGenericTypesBundle\Tests\Unit\Value\TestJsonSerializableValue;
+use PixelFederation\DoctrineGenericTypesBundle\Tests\Unit\Value\TestLongTextValue;
+use PixelFederation\DoctrineGenericTypesBundle\Tests\Unit\Value\TestNativeJsonValue;
 
 #[CoversClass(BaseGenericType::class)]
+#[CoversClass(BigIntegerValueType::class)]
 #[CoversClass(BooleanValueType::class)]
 #[CoversClass(DateTimeValueType::class)]
 #[CoversClass(DateValueType::class)]
+#[CoversClass(DecimalValueType::class)]
 #[CoversClass(FloatValueType::class)]
 #[CoversClass(IntegerValueType::class)]
+#[CoversClass(JsonSerializableValueType::class)]
+#[CoversClass(LongTextValueType::class)]
+#[CoversClass(NativeJsonValueType::class)]
 #[CoversClass(StringValueType::class)]
 #[CoversClass(UuidValueType::class)]
 #[CoversClass(InvalidDatabaseTypeException::class)]
@@ -122,6 +137,45 @@ final class BaseGenericTypeTest extends TestCase
         self::assertSame(
             'CHAR(36)',
             UuidValueType::createForValue(UserId::class)->getSQLDeclaration([], $platform),
+        );
+    }
+
+    public function testAdditionalTypeConversions(): void
+    {
+        $platform = new SQLitePlatform();
+
+        $decimalType = DecimalValueType::createForValue(TestDecimalValue::class);
+        self::assertSame('12.50', $decimalType->convertToDatabaseValue(new TestDecimalValue('12.50'), $platform));
+        self::assertEquals(new TestDecimalValue('12.5'), $decimalType->convertToPHPValue(12.5, $platform));
+        self::assertSame(
+            'NUMERIC(10, 2)',
+            $decimalType->getSQLDeclaration(['precision' => 10, 'scale' => 2], $platform),
+        );
+
+        $bigIntegerType = BigIntegerValueType::createForValue(TestBigIntegerValue::class);
+        self::assertSame(12, $bigIntegerType->convertToPHPValue('12', $platform)->toDbValue());
+        self::assertSame(ParameterType::STRING, $bigIntegerType->getBindingType());
+        self::assertSame('BIGINT', $bigIntegerType->getSQLDeclaration([], $platform));
+
+        $longTextType = LongTextValueType::createForValue(TestLongTextValue::class);
+        self::assertEquals(new TestLongTextValue('long value'), $longTextType->convertToPHPValue('long value', $platform));
+        self::assertSame('CLOB', $longTextType->getSQLDeclaration([], $platform));
+
+        $nativeJsonType = NativeJsonValueType::createForValue(TestNativeJsonValue::class);
+        $nativeJsonValue = new TestNativeJsonValue(['key' => 'value']);
+        self::assertSame('{"key":"value"}', $nativeJsonType->convertToDatabaseValue($nativeJsonValue, $platform));
+        self::assertEquals($nativeJsonValue, $nativeJsonType->convertToPHPValue('{"key":"value"}', $platform));
+        self::assertSame('CLOB', $nativeJsonType->getSQLDeclaration([], $platform));
+
+        $serializableJsonType = JsonSerializableValueType::createForValue(TestJsonSerializableValue::class);
+        $serializableJsonValue = new TestJsonSerializableValue('value');
+        self::assertSame(
+            '{"key":"value"}',
+            $serializableJsonType->convertToDatabaseValue($serializableJsonValue, $platform),
+        );
+        self::assertEquals(
+            $serializableJsonValue,
+            $serializableJsonType->convertToPHPValue('{"key":"value"}', $platform),
         );
     }
 
