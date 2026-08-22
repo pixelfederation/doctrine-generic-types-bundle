@@ -4,28 +4,28 @@ declare(strict_types=1);
 
 namespace PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type;
 
-use Doctrine\DBAL\Types\FloatType;
+use Doctrine\DBAL\Types\DateTimeImmutableType;
 use Doctrine\DBAL\Types\Type;
 use Override;
-use PixelFederation\DoctrineGenericTypesBundle\Value\FloatValue;
+use PixelFederation\DoctrineGenericTypesBundle\Value\DateTimeValue;
 
 /**
- * @extends BaseGenericType<FloatValue>
+ * @extends BaseGenericType<DateTimeValue>
  */
-final class FloatValueType extends BaseGenericType
+final class DateTimeValueType extends BaseGenericType
 {
     /**
-     * @return class-string<FloatValue>
+     * @return class-string<DateTimeValue>
      */
     #[Override]
     protected static function getAbstractValueClass(): string
     {
-        return FloatValue::class;
+        return DateTimeValue::class;
     }
 
     #[Override]
     protected static function createDoctrineType(): Type
     {
-        return new FloatType();
+        return new DateTimeImmutableType();
     }
 }

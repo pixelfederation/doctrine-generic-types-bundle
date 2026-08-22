@@ -2,18 +2,17 @@
 
 declare(strict_types=1);
 
-namespace PixelFederation\DoctrineGenericTypesBundle\Bridge\RamseyUuid\Doctrine\Type;
+namespace PixelFederation\DoctrineGenericTypesBundle\Bridge\SymfonyUid\Doctrine\Type;
 
-use Doctrine\DBAL\Types\GuidType;
 use Doctrine\DBAL\Types\Type;
 use Override;
-use PixelFederation\DoctrineGenericTypesBundle\Bridge\RamseyUuid\Value\UuidValue;
+use PixelFederation\DoctrineGenericTypesBundle\Bridge\SymfonyUid\Value\UuidValue;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\BaseGenericType;
 
 /**
  * @extends BaseGenericType<UuidValue>
  */
-final class UuidValueType extends BaseGenericType
+final class UuidValueChar36Type extends BaseGenericType
 {
     /**
      * @return class-string<UuidValue>
@@ -27,6 +26,6 @@ final class UuidValueType extends BaseGenericType
     #[Override]
     protected static function createDoctrineType(): Type
     {
-        return new GuidType();
+        return new UuidChar36Type();
     }
 }

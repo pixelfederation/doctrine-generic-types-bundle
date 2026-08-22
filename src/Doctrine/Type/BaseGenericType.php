@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type;
 
+use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\Exception\InvalidType;
 use Doctrine\DBAL\Types\Type;
@@ -23,6 +24,13 @@ abstract class BaseGenericType extends Type implements GenericType
      * @psalm-suppress PropertyNotSetInConstructor
      */
     protected string $class;
+
+    private Type $type;
+
+    public function __construct()
+    {
+        $this->type = static::createDoctrineType();
+    }
 
     #[Override]
     public static function createForValue(string $class): Type
@@ -44,6 +52,15 @@ abstract class BaseGenericType extends Type implements GenericType
         return $self;
     }
 
+    /**
+     * @inheritDoc
+     */
+    #[Override]
+    public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
+    {
+        return $this->type->getSQLDeclaration($column, $platform);
+    }
+
     #[Override]
     public function convertToDatabaseValue(mixed $value, AbstractPlatform $platform): mixed
     {
@@ -60,7 +77,7 @@ abstract class BaseGenericType extends Type implements GenericType
             );
         }
 
-        return $value->toDbValue();
+        return $this->type->convertToDatabaseValue($value->toDbValue(), $platform);
     }
 
     #[Override]
@@ -70,16 +87,25 @@ abstract class BaseGenericType extends Type implements GenericType
             return null;
         }
 
+        $dbValue = $this->type->convertToPHPValue($value, $platform);
         $class = $this->class;
         try {
-            return $class::fromDbValue($value);
+            return $class::fromDbValue($dbValue);
         } catch (InvalidValueException $e) {
             throw $e->toConversionException();
         }
+    }
+
+    #[Override]
+    public function getBindingType(): ParameterType
+    {
+        return $this->type->getBindingType();
     }
 
     /**
      * @return class-string<V>
      */
     abstract protected static function getAbstractValueClass(): string;
+
+    abstract protected static function createDoctrineType(): Type;
 }

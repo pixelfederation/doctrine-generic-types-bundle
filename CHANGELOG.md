@@ -25,6 +25,8 @@ All notable changes to this project are documented in this file.
   readonly classes. Every class extending one of them must also be declared `readonly`.
 - Replaced `BaseGenericType::ABSTRACT_VALUE` with the abstract `getAbstractValueClass()` method. Custom Doctrine
   types extending `BaseGenericType` must implement the new method instead of overriding the constant.
+- Custom Doctrine types extending `BaseGenericType` must implement `createDoctrineType()` and return the native DBAL
+  type responsible for SQL declarations, database conversions, and parameter binding.
 - Removed `BaseGenericType::getName()` in line with Doctrine DBAL 4, which no longer uses type names from type
   instances.
 - Removed the bundle's `Doctrine\Connection\ConnectionFactory` decorator. Generic types are now registered when the
@@ -39,6 +41,13 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
+- Added immutable `DateValue` and `DateTimeValue` base classes together with `DateValueType` and
+  `DateTimeValueType` for native Doctrine `DATE` and `DATETIME` mappings.
+- Added an optional Symfony UID bridge with a `UuidValue` base class. `UuidValueType` uses Symfony's native
+  GUID/16-byte binary strategy, while `UuidValueChar36Type` stores UUIDs in the canonical fixed 36-character RFC
+  4122 representation with hyphens.
+- Added `UlidValue` to the Symfony UID bridge. `UlidValueType` uses Symfony's native GUID/16-byte binary strategy,
+  while `UlidValueChar26Type` stores ULIDs in their canonical fixed 26-character Base32 representation.
 - Added the MIT license file.
 - Added a PHP service configuration at `src/Resources/config/services.php` with explicit bundle-prefixed service IDs.
 - Added a test verifying that `pxfd:doctrine_generic_types:list` is present in the console command listing together
@@ -61,6 +70,8 @@ All notable changes to this project are documented in this file.
 - Bundle configuration loading, service definitions, test application configuration, and README examples use PHP
   configuration instead of YAML.
 - Reworked generic type discovery and mapping with named Psalm type aliases and explicit configuration validation.
+- `BaseGenericType` now delegates SQL declarations, database conversions, and parameter binding to a native Doctrine
+  DBAL type. The built-in scalar, date, datetime, and Ramsey UUID generic types use the corresponding DBAL types.
 - Updated the README examples for readonly value objects, DBAL 4 exceptions, explicit string lengths, and PHP
   configuration.
 - Updated PHPUnit from 12.4 to 13.3 and adjusted tests for PHPUnit 13 static-state behavior.
@@ -88,6 +99,12 @@ All notable changes to this project are documented in this file.
    protected static function getAbstractValueClass(): string
    {
        return YourAbstractValue::class;
+   }
+
+   #[Override]
+   protected static function createDoctrineType(): Type
+   {
+       return new StringType();
    }
    ```
 

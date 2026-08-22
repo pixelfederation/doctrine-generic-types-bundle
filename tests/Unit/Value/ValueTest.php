@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace PixelFederation\DoctrineGenericTypesBundle\Tests\Unit\Value;
 
+use DateTimeImmutable;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
@@ -11,12 +12,16 @@ use PixelFederation\DoctrineGenericTypesBundle\Bridge\RamseyUuid\Value\UuidValue
 use PixelFederation\DoctrineGenericTypesBundle\Exception\InvalidDatabaseTypeException;
 use PixelFederation\DoctrineGenericTypesBundle\Value\BaseValue;
 use PixelFederation\DoctrineGenericTypesBundle\Value\BooleanValue;
+use PixelFederation\DoctrineGenericTypesBundle\Value\DateTimeValue;
+use PixelFederation\DoctrineGenericTypesBundle\Value\DateValue;
 use PixelFederation\DoctrineGenericTypesBundle\Value\FloatValue;
 use PixelFederation\DoctrineGenericTypesBundle\Value\IntegerValue;
 use PixelFederation\DoctrineGenericTypesBundle\Value\StringValue;
 use Ramsey\Uuid\Uuid;
 
 #[CoversClass(BooleanValue::class)]
+#[CoversClass(DateTimeValue::class)]
+#[CoversClass(DateValue::class)]
 #[CoversClass(FloatValue::class)]
 #[CoversClass(IntegerValue::class)]
 #[CoversClass(StringValue::class)]
@@ -83,5 +88,27 @@ final class ValueTest extends TestCase
         $this->expectException(InvalidDatabaseTypeException::class);
 
         TestUuidValue::fromDbValue(1);
+    }
+
+    public function testDateValuesRoundTrip(): void
+    {
+        $date = new DateTimeImmutable('2026-08-22 12:34:56');
+
+        self::assertSame($date, TestDateValue::fromDbValue($date)->toDbValue());
+        self::assertSame($date, TestDateTimeValue::fromDbValue($date)->toDbValue());
+    }
+
+    public function testDateValueRejectsInvalidDatabaseType(): void
+    {
+        $this->expectException(InvalidDatabaseTypeException::class);
+
+        TestDateValue::fromDbValue('2026-08-22');
+    }
+
+    public function testDateTimeValueRejectsInvalidDatabaseType(): void
+    {
+        $this->expectException(InvalidDatabaseTypeException::class);
+
+        TestDateTimeValue::fromDbValue('2026-08-22 12:34:56');
     }
 }

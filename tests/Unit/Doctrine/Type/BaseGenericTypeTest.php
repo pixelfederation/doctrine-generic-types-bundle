@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace PixelFederation\DoctrineGenericTypesBundle\Tests\Unit\Doctrine\Type;
 
+use DateTimeImmutable;
 use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Platforms\SQLitePlatform;
 use Doctrine\DBAL\Types\Exception\InvalidFormat;
@@ -14,6 +15,9 @@ use PHPUnit\Framework\TestCase;
 use PixelFederation\DoctrineGenericTypesBundle\Bridge\RamseyUuid\Doctrine\Type\UuidValueType;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\BaseGenericType;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\BooleanValueType;
+use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\DateTimeValueType;
+use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\DateValueType;
+use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\FloatValueType;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\IntegerValueType;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\StringValueType;
 use PixelFederation\DoctrineGenericTypesBundle\Exception\InvalidDatabaseTypeException;
@@ -22,9 +26,15 @@ use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\Count
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\FirstName;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\IsActive;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\UserId;
+use PixelFederation\DoctrineGenericTypesBundle\Tests\Unit\Value\TestDateTimeValue;
+use PixelFederation\DoctrineGenericTypesBundle\Tests\Unit\Value\TestDateValue;
+use PixelFederation\DoctrineGenericTypesBundle\Tests\Unit\Value\TestFloatValue;
 
 #[CoversClass(BaseGenericType::class)]
 #[CoversClass(BooleanValueType::class)]
+#[CoversClass(DateTimeValueType::class)]
+#[CoversClass(DateValueType::class)]
+#[CoversClass(FloatValueType::class)]
 #[CoversClass(IntegerValueType::class)]
 #[CoversClass(StringValueType::class)]
 #[CoversClass(UuidValueType::class)]
@@ -75,6 +85,20 @@ final class BaseGenericTypeTest extends TestCase
         self::assertEquals(new IsActive(false), $type->convertToPHPValue(0, $platform));
     }
 
+    public function testNumericDatabaseValuesUseDbalConversion(): void
+    {
+        $platform = new SQLitePlatform();
+
+        self::assertEquals(
+            new Count(12),
+            IntegerValueType::createForValue(Count::class)->convertToPHPValue('12', $platform),
+        );
+        self::assertEquals(
+            new TestFloatValue(12.5),
+            FloatValueType::createForValue(TestFloatValue::class)->convertToPHPValue('12.5', $platform),
+        );
+    }
+
     public function testBindingTypes(): void
     {
         self::assertSame(
@@ -105,6 +129,39 @@ final class BaseGenericTypeTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
         BooleanValueType::createForValue(FirstName::class);
+    }
+
+    public function testDateConversions(): void
+    {
+        $platform = new SQLitePlatform();
+        $type = DateValueType::createForValue(TestDateValue::class);
+
+        self::assertSame(
+            '2026-08-22',
+            $type->convertToDatabaseValue(new TestDateValue(new DateTimeImmutable('2026-08-22 12:34:56')), $platform),
+        );
+        self::assertEquals(
+            new TestDateValue(new DateTimeImmutable('2026-08-22 00:00:00')),
+            $type->convertToPHPValue('2026-08-22', $platform),
+        );
+        self::assertSame('DATE', $type->getSQLDeclaration([], $platform));
+    }
+
+    public function testDateTimeConversions(): void
+    {
+        $platform = new SQLitePlatform();
+        $type = DateTimeValueType::createForValue(TestDateTimeValue::class);
+        $dateTime = new DateTimeImmutable('2026-08-22 12:34:56');
+
+        self::assertSame(
+            '2026-08-22 12:34:56',
+            $type->convertToDatabaseValue(new TestDateTimeValue($dateTime), $platform),
+        );
+        self::assertEquals(
+            new TestDateTimeValue($dateTime),
+            $type->convertToPHPValue('2026-08-22 12:34:56', $platform),
+        );
+        self::assertSame('DATETIME', $type->getSQLDeclaration([], $platform));
     }
 
     public function testInvalidValueFormatConversionException(): void

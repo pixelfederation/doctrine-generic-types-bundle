@@ -33,10 +33,13 @@
     "roave/security-advisories": "dev-latest",
     "symfony/dotenv": "^7.4 || ^8.1",
     "symfony/flex": "^2.11",
-    "symfony/phpunit-bridge": "^7.4 || ^8.1"
+    "symfony/phpunit-bridge": "^7.4 || ^8.1",
+    "symfony/uid": "^7.4 || ^8.1"
   },
   "suggest": {
-    "ramsey/uuid": "Required when using the Ramsey UUID value and Doctrine type bridge."
+    "ramsey/uuid": "Required when using the Ramsey UUID value and Doctrine type bridge.",
+    "symfony/doctrine-bridge": "Required when using the Symfony UID Doctrine type bridge.",
+    "symfony/uid": "Required when using the Symfony UID value and Doctrine type bridge."
   },
   "minimum-stability": "stable",
   "prefer-stable": true,

@@ -34,11 +34,17 @@ declare(strict_types=1);
 
 use PixelFederation\DoctrineGenericTypesBundle\Bridge\RamseyUuid\Doctrine\Type\UuidValueType;
 use PixelFederation\DoctrineGenericTypesBundle\Bridge\RamseyUuid\Value\UuidValue;
+use PixelFederation\DoctrineGenericTypesBundle\Bridge\SymfonyUid\Doctrine\Type\UuidValueType as SymfonyUuidValueType;
+use PixelFederation\DoctrineGenericTypesBundle\Bridge\SymfonyUid\Value\UuidValue as SymfonyUuidValue;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\BooleanValueType;
+use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\DateTimeValueType;
+use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\DateValueType;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\FloatValueType;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\IntegerValueType;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\StringValueType;
 use PixelFederation\DoctrineGenericTypesBundle\Value\BooleanValue;
+use PixelFederation\DoctrineGenericTypesBundle\Value\DateTimeValue;
+use PixelFederation\DoctrineGenericTypesBundle\Value\DateValue;
 use PixelFederation\DoctrineGenericTypesBundle\Value\FloatValue;
 use PixelFederation\DoctrineGenericTypesBundle\Value\IntegerValue;
 use PixelFederation\DoctrineGenericTypesBundle\Value\StringValue;
@@ -48,11 +54,15 @@ return static function (ContainerConfigurator $container): void {
     $container->extension('pixel_federation_doctrine_generic_types', [
         'generic_types' => [
             BooleanValue::class => BooleanValueType::class,
+            DateTimeValue::class => DateTimeValueType::class,
+            DateValue::class => DateValueType::class,
             FloatValue::class => FloatValueType::class,
             IntegerValue::class => IntegerValueType::class,
             StringValue::class => StringValueType::class,
             // Ramsey UUID integration (requires ramsey/uuid)
             UuidValue::class => UuidValueType::class,
+            // Symfony UID integration (requires symfony/uid and symfony/doctrine-bridge)
+            SymfonyUuidValue::class => SymfonyUuidValueType::class,
         ],
         'directories' => [
             './src/App/Value',
@@ -108,6 +118,29 @@ Doctrine will handle persisting and retrieving your Value Object automatically.
 
 String-based generic types require an explicit column length because Doctrine ORM only provides the default
 length for its built-in `string` type.
+
+## Symfony UID bridge
+
+The optional Symfony UID bridge provides UUID and ULID value bases with two storage strategies each:
+
+- `UuidValueType` delegates to Symfony's Doctrine UUID type. It uses a native GUID where supported and a fixed
+  16-byte binary column otherwise.
+- `UuidValueChar36Type` stores the canonical RFC 4122 UUID with hyphens in a fixed `CHAR(36)` column.
+- `UlidValueType` delegates to Symfony's Doctrine ULID type and uses a native GUID or fixed 16-byte binary column.
+- `UlidValueChar26Type` stores the canonical Base32 ULID in a fixed `CHAR(26)` column.
+
+Choose one type for your Symfony UUID value hierarchy in the bundle configuration:
+
+```php
+use PixelFederation\DoctrineGenericTypesBundle\Bridge\SymfonyUid\Doctrine\Type\UuidValueChar36Type;
+use PixelFederation\DoctrineGenericTypesBundle\Bridge\SymfonyUid\Doctrine\Type\UuidValueType;
+use PixelFederation\DoctrineGenericTypesBundle\Bridge\SymfonyUid\Value\UuidValue;
+
+'generic_types' => [
+    UuidValue::class => UuidValueType::class,
+    // Or use UuidValueChar36Type::class for CHAR(36) storage.
+],
+```
 
 ## How to create custom Generic Types
 
