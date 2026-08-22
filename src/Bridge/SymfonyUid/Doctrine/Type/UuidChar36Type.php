@@ -8,6 +8,7 @@ use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\Exception\InvalidFormat;
 use Doctrine\DBAL\Types\Exception\InvalidType;
 use Doctrine\DBAL\Types\Type;
+use InvalidArgumentException;
 use Override;
 use Symfony\Component\Uid\Uuid;
 
@@ -53,7 +54,7 @@ final class UuidChar36Type extends Type
 
         try {
             return Uuid::fromRfc4122($value);
-        } catch (\InvalidArgumentException $e) {
+        } catch (InvalidArgumentException $e) {
             throw InvalidFormat::new($value, self::class, 'RFC 4122 UUID', $e);
         }
     }
