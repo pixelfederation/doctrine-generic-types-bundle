@@ -11,7 +11,7 @@ use Stringable;
 use Symfony\Component\Uid\Uuid;
 
 /**
- * require https://github.com/symfony/uid
+ * Requires https://github.com/symfony/uid
  *
  * @implements BaseValue<Uuid>
  * @psalm-consistent-constructor
