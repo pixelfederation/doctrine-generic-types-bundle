@@ -12,7 +12,7 @@ use Ramsey\Uuid\UuidInterface;
 use Stringable;
 
 /**
- * require https://github.com/ramsey/uuid
+ * Requires https://github.com/ramsey/uuid
  *
  * @implements BaseValue<UuidInterface>
  * @psalm-consistent-constructor
