@@ -51,10 +51,10 @@ final class UuidChar36Type extends Type
             throw InvalidType::new($value, self::class, ['null', 'string', Uuid::class]);
         }
 
-        if (!Uuid::isValid($value, Uuid::FORMAT_RFC_4122)) {
-            throw InvalidFormat::new($value, self::class, 'RFC 4122 UUID');
+        try {
+            return Uuid::fromRfc4122($value);
+        } catch (\InvalidArgumentException $e) {
+            throw InvalidFormat::new($value, self::class, 'RFC 4122 UUID', $e);
         }
-
-        return Uuid::fromString($value);
     }
 }
