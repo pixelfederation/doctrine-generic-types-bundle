@@ -6,13 +6,17 @@ namespace PixelFederation\DoctrineGenericTypesBundle\DependencyInjection;
 
 use Composer\ClassMapGenerator\ClassMapGenerator;
 use Override;
+use PixelFederation\DoctrineGenericTypesBundle\Bridge\JmsSerializer\Doctrine\TypeRegistry\JmsSerializerGenericTypeFactory;
+use PixelFederation\DoctrineGenericTypesBundle\Bridge\SymfonySerializer\Doctrine\TypeRegistry\SymfonySerializerGenericTypeFactory;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\GenericType;
+use PixelFederation\DoctrineGenericTypesBundle\Doctrine\TypeRegistry\GenericTypeFactoryProvider;
 use PixelFederation\DoctrineGenericTypesBundle\Value\Value;
 use ReflectionClass;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
+use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\DependencyInjection\ConfigurableExtension;
 
 /**
@@ -35,9 +39,11 @@ final class PixelFederationDoctrineGenericTypesExtension extends ConfigurableExt
 
         $genericTypes = $this->getGenericTypesMapping($mergedConfig['generic_types']);
         $directories = $this->getDirectories($mergedConfig['directories']);
+        $serializerBridges = $this->getSerializerBridges($mergedConfig['serializer_bridges']);
 
         $mapping = $this->createDoctrineTypesMapping($genericTypes, $directories);
         $container->setParameter('pixel_federation.doctrine_generic_types.generic_types_mapping', $mapping);
+        $this->registerSerializerBridges($container, $serializerBridges);
     }
 
     /**
@@ -170,6 +176,80 @@ final class PixelFederationDoctrineGenericTypesExtension extends ConfigurableExt
         }
 
         return $directories;
+    }
+
+    /**
+     * @return array<string, array{service: string}>
+     */
+    private function getSerializerBridges(mixed $configuredBridges): array
+    {
+        $this->assertCondition(
+            is_array($configuredBridges),
+            'The "serializer_bridges" configuration must be an array.',
+        );
+
+        $bridges = [];
+        foreach (['symfony', 'jms'] as $bridge) {
+            if (!isset($configuredBridges[$bridge])) {
+                continue;
+            }
+
+            $configuration = $configuredBridges[$bridge];
+            $this->assertCondition(is_array($configuration), sprintf('The "%s" bridge must be an array.', $bridge));
+            $service = $configuration['service'] ?? null;
+            $this->assertCondition(is_string($service), sprintf(
+                'The "%s" serializer bridge service must be a string.',
+                $bridge,
+            ));
+            $bridges[$bridge] = ['service' => $service];
+        }
+
+        return $bridges;
+    }
+
+    /**
+     * @param array<string, array{service: string}> $bridges
+     */
+    private function registerSerializerBridges(ContainerBuilder $container, array $bridges): void
+    {
+        $this->registerSymfonySerializerBridge($container, $bridges['symfony']['service'] ?? null);
+        $this->registerJmsSerializerBridge($container, $bridges['jms']['service'] ?? null);
+    }
+
+    private function registerSymfonySerializerBridge(ContainerBuilder $container, ?string $service): void
+    {
+        if ($service === null) {
+            return;
+        }
+
+        $container
+            ->register(
+                'pixel_federation.doctrine_generic_types.symfony_serializer_generic_type_factory',
+                SymfonySerializerGenericTypeFactory::class,
+            )
+            ->setArgument('$serializer', new Reference($service))
+            ->addTag(
+                GenericTypeFactoryProvider::TAG,
+                ['priority' => GenericTypeFactoryProvider::DEFAULT_PRIORITY],
+            );
+    }
+
+    private function registerJmsSerializerBridge(ContainerBuilder $container, ?string $service): void
+    {
+        if ($service === null) {
+            return;
+        }
+
+        $container
+            ->register(
+                'pixel_federation.doctrine_generic_types.jms_serializer_generic_type_factory',
+                JmsSerializerGenericTypeFactory::class,
+            )
+            ->setArgument('$serializer', new Reference($service))
+            ->addTag(
+                GenericTypeFactoryProvider::TAG,
+                ['priority' => GenericTypeFactoryProvider::DEFAULT_PRIORITY],
+            );
     }
 
     /**

@@ -13,7 +13,8 @@ final readonly class GenericTypesRegistrator
      * @param array<class-string<Value<mixed>>, class-string<GenericType>> $genericTypesMapping
      */
     public function __construct(
-        private TypeRegistryProviderInterface $typeRegistryProvider,
+        private TypeRegistryProvider $typeRegistryProvider,
+        private GenericTypeFactoryProvider $genericTypeFactoryProvider,
         private array $genericTypesMapping = [],
     ) {
     }
@@ -26,7 +27,8 @@ final readonly class GenericTypesRegistrator
                 continue;
             }
 
-            $typeRegistry->register($value, $type::createForValue($value));
+            $factory = $this->genericTypeFactoryProvider->provide($type);
+            $typeRegistry->register($value, $factory->create($type, $value));
         }
     }
 }

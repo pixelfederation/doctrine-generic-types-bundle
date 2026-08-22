@@ -17,7 +17,7 @@ use PixelFederation\DoctrineGenericTypesBundle\Value\BaseValue;
  * @template V of BaseValue
  * @psalm-consistent-constructor
  */
-abstract class BaseGenericType extends Type implements GenericType
+abstract class BaseGenericType extends Type implements StaticGenericType
 {
     /**
      * @var class-string<V>

@@ -22,6 +22,7 @@
     "doctrine/orm": "^3.5",
     "ergebnis/composer-normalize": "^2.52",
     "friendsofphp/php-cs-fixer": "^3.89",
+    "jms/serializer": "^3.32",
     "matthiasnoback/symfony-dependency-injection-test": "^6.1",
     "php-parallel-lint/php-parallel-lint": "^1.4",
     "phpro/grumphp": "^2.23",
@@ -34,11 +35,15 @@
     "symfony/dotenv": "^7.4 || ^8.1",
     "symfony/flex": "^2.11",
     "symfony/phpunit-bridge": "^7.4 || ^8.1",
+    "symfony/property-access": "^7.4 || ^8.1",
+    "symfony/serializer": "^7.4 || ^8.1",
     "symfony/uid": "^7.4 || ^8.1"
   },
   "suggest": {
+    "jms/serializer-bundle": "Required when using the JMS Serializer value and Doctrine type bridge in Symfony.",
     "ramsey/uuid": "Required when using the Ramsey UUID value and Doctrine type bridge.",
     "symfony/doctrine-bridge": "Required when using the Symfony UID Doctrine type bridge.",
+    "symfony/serializer": "Required when using the Symfony Serializer value and Doctrine type bridge.",
     "symfony/uid": "Required when using the Symfony UID value and Doctrine type bridge."
   },
   "minimum-stability": "stable",

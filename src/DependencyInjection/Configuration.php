@@ -31,6 +31,24 @@ final class Configuration implements ConfigurationInterface
                     ->useAttributeAsKey('path')
                     ->prototype('scalar');
 
+        $serializerBridges = $rootNode
+            ->children()
+                ->arrayNode('serializer_bridges')
+                    ->addDefaultsIfNotSet()
+                    ->children();
+
+        $serializerBridges->arrayNode('symfony')
+            ->children()
+                ->scalarNode('service')
+                    ->isRequired()
+                    ->cannotBeEmpty();
+
+        $serializerBridges->arrayNode('jms')
+            ->children()
+                ->scalarNode('service')
+                    ->isRequired()
+                    ->cannotBeEmpty();
+
         return $treeBuilder;
     }
 }

@@ -14,11 +14,11 @@ use Doctrine\DBAL\Types\Type;
 use InvalidArgumentException;
 use JsonException;
 use Override;
-use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\GenericType;
+use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\StaticGenericType;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\CustomValue\Currency;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\CustomValue\MoneyValue;
 
-final class MoneyValueType extends JsonType implements GenericType
+final class MoneyValueType extends JsonType implements StaticGenericType
 {
     /**
      * @var class-string<MoneyValue>

@@ -6,9 +6,9 @@ namespace PixelFederation\DoctrineGenericTypesBundle\Tests\Unit\Doctrine\TypeReg
 
 use Doctrine\DBAL\Types\TypeRegistry;
 use Override;
-use PixelFederation\DoctrineGenericTypesBundle\Doctrine\TypeRegistry\TypeRegistryProviderInterface;
+use PixelFederation\DoctrineGenericTypesBundle\Doctrine\TypeRegistry\TypeRegistryProvider as TypeRegistryProviderContract;
 
-final readonly class TypeRegistryProvider implements TypeRegistryProviderInterface
+final readonly class TypeRegistryProvider implements TypeRegistryProviderContract
 {
     private TypeRegistry $typeRegistry;
 

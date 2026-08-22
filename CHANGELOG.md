@@ -36,6 +36,8 @@ All notable changes to this project are documented in this file.
   custom type.
 - Updated conversion exceptions to the Doctrine DBAL 4 exception classes such as `InvalidType`, `InvalidFormat`,
   `SerializationFailed`, and `ValueNotConvertible`.
+- `GenericType` is now a marker interface. Custom types using the static `createForValue()` construction mechanism
+  must implement `StaticGenericType` instead.
 - Boolean conversion now uses DBAL 4's `convertBooleansToDatabaseValue()` API, and binding types return
   `Doctrine\DBAL\ParameterType`.
 
@@ -49,6 +51,12 @@ All notable changes to this project are documented in this file.
   serialization through `JsonSerializable` and require concrete values to implement hydration through
   `fromDbValue()`. `NativeJsonValue` and `NativeJsonValueType` delegate native PHP value serialization and
   deserialization to Doctrine DBAL's JSON type.
+- Added the extensible `GenericTypeFactory` and `GenericTypeFactoryProvider`. The built-in
+  `StaticGenericTypeFactory` preserves static type construction, while dependency-aware bridges can provide tagged
+  factories that construct Doctrine types with injected services.
+- Added optional Symfony Serializer and JMS Serializer bridges. Each bridge stores complete value objects as JSON
+  and restores their concrete classes through an explicitly configured serializer service. Enabling a bridge
+  requires its serializer service ID under `serializer_bridges`.
 - Added immutable `DateValue` and `DateTimeValue` base classes together with `DateValueType` and
   `DateTimeValueType` for native Doctrine `DATE` and `DATETIME` mappings.
 - Added an optional Symfony UID bridge with a `UuidValue` base class. `UuidValueType` uses Symfony's native
@@ -115,6 +123,9 @@ All notable changes to this project are documented in this file.
        return new StringType();
    }
    ```
+
+   Custom Doctrine types that directly implemented `GenericType` and expose `createForValue()` must implement
+   `StaticGenericType` instead.
 
 4. Remove custom uses of Doctrine DBAL 3 APIs such as `Type::getName()`, the old `ConversionException` factories,
    and integer binding-type return values.

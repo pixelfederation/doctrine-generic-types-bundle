@@ -18,6 +18,7 @@ use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\FloatValueType;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\GenericType;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\IntegerValueType;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\StringValueType;
+use PixelFederation\DoctrineGenericTypesBundle\Doctrine\TypeRegistry\GenericTypeFactoryProvider;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\CustomValue\MoneyValue;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\CustomValue\Price;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Doctrine\Type\MoneyValueType;
@@ -36,6 +37,8 @@ use PixelFederation\DoctrineGenericTypesBundle\Value\FloatValue;
 use PixelFederation\DoctrineGenericTypesBundle\Value\IntegerValue;
 use PixelFederation\DoctrineGenericTypesBundle\Value\StringValue;
 use PixelFederation\DoctrineGenericTypesBundle\Value\Value;
+use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
+use Symfony\Component\DependencyInjection\Reference;
 
 #[CoversClass(PixelFederationDoctrineGenericTypesExtension::class)]
 #[CoversClass(Configuration::class)]
@@ -151,6 +154,54 @@ final class PixelFederationDoctrineGenericTypesExtensionTest extends AbstractExt
     {
         $this->expectNotToPerformAssertions();
         $this->load();
+    }
+
+    public function testStaticGenericTypeFactoryHasDefaultPriority(): void
+    {
+        $this->load();
+
+        $factory = $this->container->getDefinition(
+            'pixel_federation.doctrine_generic_types.static_generic_type_factory',
+        );
+
+        self::assertSame(
+            [['priority' => GenericTypeFactoryProvider::DEFAULT_PRIORITY]],
+            $factory->getTag(GenericTypeFactoryProvider::TAG),
+        );
+    }
+
+    public function testSerializerBridgeConfiguration(): void
+    {
+        $serializerBridges = [
+            'symfony' => ['service' => 'app.serializer.symfony'],
+            'jms' => ['service' => 'app.serializer.jms'],
+        ];
+
+        $this->load(['serializer_bridges' => $serializerBridges]);
+
+        $symfonyFactory = $this->container->getDefinition(
+            'pixel_federation.doctrine_generic_types.symfony_serializer_generic_type_factory',
+        );
+        $jmsFactory = $this->container->getDefinition(
+            'pixel_federation.doctrine_generic_types.jms_serializer_generic_type_factory',
+        );
+
+        self::assertEquals(new Reference('app.serializer.symfony'), $symfonyFactory->getArgument('$serializer'));
+        self::assertEquals(new Reference('app.serializer.jms'), $jmsFactory->getArgument('$serializer'));
+        $factoryTag = [['priority' => GenericTypeFactoryProvider::DEFAULT_PRIORITY]];
+        self::assertSame($factoryTag, $symfonyFactory->getTag(GenericTypeFactoryProvider::TAG));
+        self::assertSame($factoryTag, $jmsFactory->getTag(GenericTypeFactoryProvider::TAG));
+    }
+
+    public function testSerializerBridgeRequiresServiceId(): void
+    {
+        $this->expectException(InvalidConfigurationException::class);
+
+        $this->load([
+            'serializer_bridges' => [
+                'symfony' => [],
+            ],
+        ]);
     }
 
     /**

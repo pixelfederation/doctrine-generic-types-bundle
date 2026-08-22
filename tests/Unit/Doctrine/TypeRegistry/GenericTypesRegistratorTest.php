@@ -15,7 +15,9 @@ use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\FloatValueType;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\GenericType;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\IntegerValueType;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\StringValueType;
+use PixelFederation\DoctrineGenericTypesBundle\Doctrine\TypeRegistry\GenericTypeFactoryProvider;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\TypeRegistry\GenericTypesRegistrator;
+use PixelFederation\DoctrineGenericTypesBundle\Doctrine\TypeRegistry\StaticGenericTypeFactory;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\CustomValue\Price;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Doctrine\Type\AgeType;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Doctrine\Type\MoneyValueType;
@@ -69,6 +71,7 @@ final class GenericTypesRegistratorTest extends TestCase
         $typeRegistry = $typeRegistryProvider->provide();
         $genericTypesRegistrator = new GenericTypesRegistrator(
             $typeRegistryProvider,
+            self::createFactoryProvider(),
             $genericTypesMapping,
         );
         $genericTypesRegistrator->register();
@@ -94,7 +97,10 @@ final class GenericTypesRegistratorTest extends TestCase
     {
         $typeRegistryProvider = new TypeRegistryProvider();
         $typeRegistry = $typeRegistryProvider->provide();
-        $genericTypesRegistrator = new GenericTypesRegistrator($typeRegistryProvider);
+        $genericTypesRegistrator = new GenericTypesRegistrator(
+            $typeRegistryProvider,
+            self::createFactoryProvider(),
+        );
 
         self::assertFalse($typeRegistry->has(FirstName::class));
         $genericTypesRegistrator->register();
@@ -111,6 +117,7 @@ final class GenericTypesRegistratorTest extends TestCase
 
         $genericTypesRegistrator = new GenericTypesRegistrator(
             $typeRegistryProvider,
+            self::createFactoryProvider(),
             [
                 Age::class => IntegerValueType::class,
             ],
@@ -128,6 +135,7 @@ final class GenericTypesRegistratorTest extends TestCase
         $typeRegistry = $typeRegistryProvider->provide();
         $genericTypesRegistrator = new GenericTypesRegistrator(
             $typeRegistryProvider,
+            self::createFactoryProvider(),
             [
                 FirstName::class => StringValueType::class,
                 IsActive::class => BooleanValueType::class,
@@ -141,5 +149,10 @@ final class GenericTypesRegistratorTest extends TestCase
 
         self::assertSame($registeredFirstNameType, $typeRegistry->get(FirstName::class));
         self::assertSame($registeredIsActiveType, $typeRegistry->get(IsActive::class));
+    }
+
+    private static function createFactoryProvider(): GenericTypeFactoryProvider
+    {
+        return new GenericTypeFactoryProvider([new StaticGenericTypeFactory()]);
     }
 }
