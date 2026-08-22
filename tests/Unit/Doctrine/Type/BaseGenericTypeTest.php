@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace PixelFederation\DoctrineGenericTypesBundle\Tests\Unit\Doctrine\Type;
 
+use DateInterval;
 use DateTimeImmutable;
 use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Platforms\SQLitePlatform;
@@ -13,9 +14,11 @@ use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use PixelFederation\DoctrineGenericTypesBundle\Bridge\RamseyUuid\Doctrine\Type\UuidValueType;
+use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\AsciiStringValueType;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\BaseGenericType;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\BigIntegerValueType;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\BooleanValueType;
+use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\DateIntervalValueType;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\DateTimeValueType;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\DateValueType;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\DecimalValueType;
@@ -25,13 +28,16 @@ use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\JsonSerializableVal
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\LongTextValueType;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\NativeJsonValueType;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\StringValueType;
+use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\TimeValueType;
 use PixelFederation\DoctrineGenericTypesBundle\Exception\InvalidDatabaseTypeException;
 use PixelFederation\DoctrineGenericTypesBundle\Exception\InvalidValueFormatException;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\Count;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\FirstName;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\IsActive;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\UserId;
+use PixelFederation\DoctrineGenericTypesBundle\Tests\Unit\Value\TestAsciiStringValue;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\Unit\Value\TestBigIntegerValue;
+use PixelFederation\DoctrineGenericTypesBundle\Tests\Unit\Value\TestDateIntervalValue;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\Unit\Value\TestDateTimeValue;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\Unit\Value\TestDateValue;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\Unit\Value\TestDecimalValue;
@@ -39,11 +45,14 @@ use PixelFederation\DoctrineGenericTypesBundle\Tests\Unit\Value\TestFloatValue;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\Unit\Value\TestJsonSerializableValue;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\Unit\Value\TestLongTextValue;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\Unit\Value\TestNativeJsonValue;
+use PixelFederation\DoctrineGenericTypesBundle\Tests\Unit\Value\TestTimeValue;
 
 #[CoversClass(BaseGenericType::class)]
+#[CoversClass(AsciiStringValueType::class)]
 #[CoversClass(BigIntegerValueType::class)]
 #[CoversClass(BooleanValueType::class)]
 #[CoversClass(DateTimeValueType::class)]
+#[CoversClass(DateIntervalValueType::class)]
 #[CoversClass(DateValueType::class)]
 #[CoversClass(DecimalValueType::class)]
 #[CoversClass(FloatValueType::class)]
@@ -52,6 +61,7 @@ use PixelFederation\DoctrineGenericTypesBundle\Tests\Unit\Value\TestNativeJsonVa
 #[CoversClass(LongTextValueType::class)]
 #[CoversClass(NativeJsonValueType::class)]
 #[CoversClass(StringValueType::class)]
+#[CoversClass(TimeValueType::class)]
 #[CoversClass(UuidValueType::class)]
 #[CoversClass(InvalidDatabaseTypeException::class)]
 #[CoversClass(InvalidValueFormatException::class)]
@@ -138,6 +148,17 @@ final class BaseGenericTypeTest extends TestCase
             'CHAR(36)',
             UuidValueType::createForValue(UserId::class)->getSQLDeclaration([], $platform),
         );
+        self::assertSame(
+            'VARCHAR(32)',
+            AsciiStringValueType::createForValue(TestAsciiStringValue::class)->getSQLDeclaration(
+                ['length' => 32],
+                $platform,
+            ),
+        );
+        self::assertSame(
+            ParameterType::ASCII,
+            AsciiStringValueType::createForValue(TestAsciiStringValue::class)->getBindingType(),
+        );
     }
 
     public function testAdditionalTypeConversions(): void
@@ -216,6 +237,34 @@ final class BaseGenericTypeTest extends TestCase
             $type->convertToPHPValue('2026-08-22 12:34:56', $platform),
         );
         self::assertSame('DATETIME', $type->getSQLDeclaration([], $platform));
+    }
+
+    public function testTimeConversions(): void
+    {
+        $platform = new SQLitePlatform();
+        $type = TimeValueType::createForValue(TestTimeValue::class);
+        $time = new DateTimeImmutable('1970-01-01 12:34:56');
+
+        self::assertSame('12:34:56', $type->convertToDatabaseValue(new TestTimeValue($time), $platform));
+        self::assertEquals(new TestTimeValue($time), $type->convertToPHPValue('12:34:56', $platform));
+        self::assertSame('TIME', $type->getSQLDeclaration([], $platform));
+    }
+
+    public function testDateIntervalConversions(): void
+    {
+        $platform = new SQLitePlatform();
+        $type = DateIntervalValueType::createForValue(TestDateIntervalValue::class);
+        $interval = new DateInterval('P1Y2M3DT4H5M6S');
+
+        self::assertSame(
+            '+P01Y02M03DT04H05M06S',
+            $type->convertToDatabaseValue(new TestDateIntervalValue($interval), $platform),
+        );
+        self::assertEquals(
+            new TestDateIntervalValue($interval),
+            $type->convertToPHPValue('+P01Y02M03DT04H05M06S', $platform),
+        );
+        self::assertSame('VARCHAR(255)', $type->getSQLDeclaration([], $platform));
     }
 
     public function testInvalidValueFormatConversionException(): void

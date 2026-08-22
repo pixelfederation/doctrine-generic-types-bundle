@@ -6,18 +6,12 @@ All notable changes to this project are documented in this file.
 
 ### Requirements
 
-- Raised the minimum PHP version from 8.3 to 8.5.
-- Upgraded Doctrine DBAL from 3.x to 4.4 or newer.
-- Upgraded DoctrineBundle from 2.16 or newer to 3.3 or newer.
-- Upgraded the supported Symfony versions from 7.3 to 7.4 and 8.1.
-- Moved Doctrine ORM and Symfony Dotenv to development dependencies because they are only required by the test
-  application.
-- Removed the direct Symfony ExpressionLanguage dependency; development tooling installs it transitively when needed.
-- Removed the direct Symfony YAML dependency. The bundle's internal service configuration and the documented
-  application configuration now use PHP.
-- Added Symfony Flex as a development dependency and added the generated `symfony.lock`.
-- Added `ramsey/uuid` to Composer suggestions. It remains optional and is required only when using the Ramsey UUID
-  bridge.
+- PHP 8.5 or newer (previously PHP 8.3).
+- Doctrine DBAL 4.4 or newer and DoctrineBundle 3.3 or newer.
+- Symfony 7.4 or 8.1.
+- `ramsey/uuid` is now an optional dependency required only by the Ramsey UUID bridge.
+- Symfony YAML is no longer installed by the bundle; applications may still use YAML configuration when they install
+  the component themselves.
 
 ### Breaking changes
 
@@ -43,36 +37,22 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
-- Added `BigIntegerValue` and `BigIntegerValueType` for Doctrine `BIGINT` mappings. Values are represented as
-  integers or numeric strings to preserve numbers outside PHP's integer range.
-- Added `DecimalValue` and `DecimalValueType` for exact Doctrine `DECIMAL` mappings backed by numeric strings.
-- Added `LongTextValue` and `LongTextValueType` for Doctrine `TEXT`/CLOB mappings without a string length limit.
+- Added value bases and matching Doctrine types for `BIGINT`, exact `DECIMAL`, `TEXT`/CLOB, ASCII strings, immutable
+  `TIME`, and `DATEINTERVAL` mappings: `BigIntegerValue`, `DecimalValue`, `LongTextValue`, `AsciiStringValue`,
+  `TimeValue`, and `DateIntervalValue`.
+- Added immutable `DateValue` and `DateTimeValue` mappings for native Doctrine `DATE` and `DATETIME` values.
 - Added two JSON mapping strategies. `JsonSerializableValue` and `JsonSerializableValueType` provide explicit
   serialization through `JsonSerializable` and require concrete values to implement hydration through
   `fromDbValue()`. `NativeJsonValue` and `NativeJsonValueType` delegate native PHP value serialization and
   deserialization to Doctrine DBAL's JSON type.
-- Added the extensible `GenericTypeFactory` and `GenericTypeFactoryProvider`. The built-in
-  `StaticGenericTypeFactory` preserves static type construction, while dependency-aware bridges can provide tagged
-  factories that construct Doctrine types with injected services.
+- Added the extensible, prioritized `GenericTypeFactory` mechanism. Tagged factories can construct Doctrine types
+  with injected services; `StaticGenericTypeFactory` handles types implementing `StaticGenericType`.
 - Added optional Symfony Serializer and JMS Serializer bridges. Each bridge stores complete value objects as JSON
   and restores their concrete classes through an explicitly configured serializer service. Enabling a bridge
   requires its serializer service ID under `serializer_bridges`.
-- Added immutable `DateValue` and `DateTimeValue` base classes together with `DateValueType` and
-  `DateTimeValueType` for native Doctrine `DATE` and `DATETIME` mappings.
-- Added an optional Symfony UID bridge with a `UuidValue` base class. `UuidValueType` uses Symfony's native
-  GUID/16-byte binary strategy, while `UuidValueChar36Type` stores UUIDs in the canonical fixed 36-character RFC
-  4122 representation with hyphens.
-- Added `UlidValue` to the Symfony UID bridge. `UlidValueType` uses Symfony's native GUID/16-byte binary strategy,
-  while `UlidValueChar26Type` stores ULIDs in their canonical fixed 26-character Base32 representation.
+- Added an optional Symfony UID bridge for UUID and ULID values. Native strategies use GUID/16-byte binary storage;
+  `UuidValueChar36Type` and `UlidValueChar26Type` provide canonical fixed-length string storage.
 - Added the MIT license file.
-- Added a PHP service configuration at `src/Resources/config/services.php` with explicit bundle-prefixed service IDs.
-- Added a test verifying that `pxfd:doctrine_generic_types:list` is present in the console command listing together
-  with its description.
-- Updated Doctrine schema validation coverage for DBAL 4.
-- Added CI coverage for Symfony 7.4 and Symfony 8.1 on PHP 8.5.
-- Added a lowest-supported-dependencies CI variant using `composer update --prefer-lowest --prefer-stable` with
-  Symfony 7.4.
-- Added CODEOWNERS and updated the Docker development setup.
 
 ### Changed
 
@@ -85,20 +65,13 @@ All notable changes to this project are documented in this file.
   `Type::getTypesMap()` API instead of the internal `TypeRegistry::getMap()` API.
 - Bundle configuration loading, service definitions, test application configuration, and README examples use PHP
   configuration instead of YAML.
-- Reworked generic type discovery and mapping with named Psalm type aliases and explicit configuration validation.
+- Reworked generic type discovery, mapping, and configuration validation.
 - `BaseGenericType` now delegates SQL declarations, database conversions, and parameter binding to a native Doctrine
   DBAL type. The built-in scalar, date, datetime, and Ramsey UUID generic types use the corresponding DBAL types.
-- Updated the README examples for readonly value objects, DBAL 4 exceptions, explicit string lengths, and PHP
-  configuration.
-- Updated PHPUnit from 12.4 to 13.3 and adjusted tests for PHPUnit 13 static-state behavior.
-- Updated code quality tooling for PHP 8.5 and reduced unnecessary Psalm and PHPCS suppressions.
 
 ### Removed
 
 - Removed `src/Resources/config/services.yaml` and the YAML files from the test application.
-- Removed the obsolete Doctrine connection factory decorator.
-- Removed PHP Mess Detector and its configuration; the remaining checks continue to run through GrumPHP.
-- Removed Symfony Test Pack in favor of explicit test dependencies.
 
 ### Upgrade guide
 

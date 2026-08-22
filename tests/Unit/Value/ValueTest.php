@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace PixelFederation\DoctrineGenericTypesBundle\Tests\Unit\Value;
 
+use DateInterval;
 use DateTimeImmutable;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -11,9 +12,11 @@ use PHPUnit\Framework\TestCase;
 use PixelFederation\DoctrineGenericTypesBundle\Bridge\RamseyUuid\Value\UuidValue;
 use PixelFederation\DoctrineGenericTypesBundle\Exception\InvalidDatabaseTypeException;
 use PixelFederation\DoctrineGenericTypesBundle\Exception\InvalidValueFormatException;
+use PixelFederation\DoctrineGenericTypesBundle\Value\AsciiStringValue;
 use PixelFederation\DoctrineGenericTypesBundle\Value\BaseValue;
 use PixelFederation\DoctrineGenericTypesBundle\Value\BigIntegerValue;
 use PixelFederation\DoctrineGenericTypesBundle\Value\BooleanValue;
+use PixelFederation\DoctrineGenericTypesBundle\Value\DateIntervalValue;
 use PixelFederation\DoctrineGenericTypesBundle\Value\DateTimeValue;
 use PixelFederation\DoctrineGenericTypesBundle\Value\DateValue;
 use PixelFederation\DoctrineGenericTypesBundle\Value\DecimalValue;
@@ -23,11 +26,14 @@ use PixelFederation\DoctrineGenericTypesBundle\Value\JsonSerializableValue;
 use PixelFederation\DoctrineGenericTypesBundle\Value\LongTextValue;
 use PixelFederation\DoctrineGenericTypesBundle\Value\NativeJsonValue;
 use PixelFederation\DoctrineGenericTypesBundle\Value\StringValue;
+use PixelFederation\DoctrineGenericTypesBundle\Value\TimeValue;
 use Ramsey\Uuid\Uuid;
 
 #[CoversClass(BooleanValue::class)]
+#[CoversClass(AsciiStringValue::class)]
 #[CoversClass(BigIntegerValue::class)]
 #[CoversClass(DateTimeValue::class)]
+#[CoversClass(DateIntervalValue::class)]
 #[CoversClass(DateValue::class)]
 #[CoversClass(DecimalValue::class)]
 #[CoversClass(FloatValue::class)]
@@ -36,6 +42,7 @@ use Ramsey\Uuid\Uuid;
 #[CoversClass(LongTextValue::class)]
 #[CoversClass(NativeJsonValue::class)]
 #[CoversClass(StringValue::class)]
+#[CoversClass(TimeValue::class)]
 #[CoversClass(UuidValue::class)]
 final class ValueTest extends TestCase
 {
@@ -44,6 +51,7 @@ final class ValueTest extends TestCase
      */
     public static function scalarValueProvider(): iterable
     {
+        yield 'ASCII string' => [TestAsciiStringValue::class, 'ascii-value'];
         yield 'boolean' => [TestBooleanValue::class, true];
         yield 'big integer as integer' => [TestBigIntegerValue::class, 12];
         yield 'big integer as string' => [TestBigIntegerValue::class, '9223372036854775808'];
@@ -60,6 +68,7 @@ final class ValueTest extends TestCase
      */
     public static function invalidScalarValueProvider(): iterable
     {
+        yield 'ASCII string' => [TestAsciiStringValue::class, 1];
         yield 'boolean' => [TestBooleanValue::class, 1];
         yield 'big integer' => [TestBigIntegerValue::class, 1.5];
         yield 'decimal' => [TestDecimalValue::class, 1.5];
@@ -106,6 +115,13 @@ final class ValueTest extends TestCase
         new TestDecimalValue('not-a-number');
     }
 
+    public function testAsciiStringRejectsNonAsciiCharacters(): void
+    {
+        $this->expectException(InvalidValueFormatException::class);
+
+        new TestAsciiStringValue('ľščťž');
+    }
+
     public function testJsonSerializableValueRoundTrip(): void
     {
         $value = TestJsonSerializableValue::fromDbValue(['key' => 'value']);
@@ -137,6 +153,14 @@ final class ValueTest extends TestCase
 
         self::assertSame($date, TestDateValue::fromDbValue($date)->toDbValue());
         self::assertSame($date, TestDateTimeValue::fromDbValue($date)->toDbValue());
+        self::assertSame($date, TestTimeValue::fromDbValue($date)->toDbValue());
+    }
+
+    public function testDateIntervalValueRoundTrip(): void
+    {
+        $interval = new DateInterval('P1Y2M3DT4H5M6S');
+
+        self::assertSame($interval, TestDateIntervalValue::fromDbValue($interval)->toDbValue());
     }
 
     public function testDateValueRejectsInvalidDatabaseType(): void
@@ -151,5 +175,19 @@ final class ValueTest extends TestCase
         $this->expectException(InvalidDatabaseTypeException::class);
 
         TestDateTimeValue::fromDbValue('2026-08-22 12:34:56');
+    }
+
+    public function testTimeValueRejectsInvalidDatabaseType(): void
+    {
+        $this->expectException(InvalidDatabaseTypeException::class);
+
+        TestTimeValue::fromDbValue('12:34:56');
+    }
+
+    public function testDateIntervalValueRejectsInvalidDatabaseType(): void
+    {
+        $this->expectException(InvalidDatabaseTypeException::class);
+
+        TestDateIntervalValue::fromDbValue('P1D');
     }
 }
