@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace PixelFederation\DoctrineGenericTypesBundle\Tests\Integration\Doctrine;
 
+use DateInterval;
+use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PixelFederation\DoctrineGenericTypesBundle\DependencyInjection\Configuration;
@@ -17,10 +19,13 @@ use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Entity\Foo;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\OtherValue\Age;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\Amount;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\Count;
+use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\ExternalCode;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\FirstName;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\IsActive;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\IsExpired;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\LastName;
+use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\OpeningTime;
+use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\RetentionPeriod;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\SuccessRate;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\UserId;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\ValueWithoutGenericType\HeightInCm;
@@ -58,6 +63,9 @@ final class CrudTest extends KernelTestCase
         $age = new Age(30);
         $heightInCm = new HeightInCm(180);
         $price = new Price(99.99, Currency::EUR);
+        $externalCode = new ExternalCode('external-123');
+        $openingTime = new OpeningTime(new DateTimeImmutable('1970-01-01 09:30:00'));
+        $retentionPeriod = new RetentionPeriod(new DateInterval('P1Y2M3D'));
 
         $newFoo = new Foo(
             userId: $userId,
@@ -71,6 +79,9 @@ final class CrudTest extends KernelTestCase
             age: $age,
             heightInCm: $heightInCm,
             price: $price,
+            externalCode: $externalCode,
+            openingTime: $openingTime,
+            retentionPeriod: $retentionPeriod,
         );
         $entityManager->persist($newFoo);
         $entityManager->flush();
@@ -91,6 +102,9 @@ final class CrudTest extends KernelTestCase
         self::assertEquals($age, $fooFromDb->age);
         self::assertEquals($heightInCm, $fooFromDb->heightInCm);
         self::assertEquals($price, $fooFromDb->price);
+        self::assertEquals($externalCode, $fooFromDb->externalCode);
+        self::assertEquals($openingTime, $fooFromDb->openingTime);
+        self::assertEquals($retentionPeriod, $fooFromDb->retentionPeriod);
 
         $updatedCount = new Count(10);
         $updatedPrice = new Price(10.5, Currency::USD);

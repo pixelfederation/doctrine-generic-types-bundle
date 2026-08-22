@@ -60,4 +60,13 @@ final class SerializerGenericTypeFactoryTest extends TestCase
 
         $factory->create(SymfonySerializerValueType::class, FirstName::class);
     }
+
+    public function testJmsFactoryRejectsIncompatibleValue(): void
+    {
+        $factory = new JmsSerializerGenericTypeFactory(SerializerBuilder::create()->build());
+
+        $this->expectException(InvalidArgumentException::class);
+
+        $factory->create(JmsSerializerValueType::class, FirstName::class);
+    }
 }

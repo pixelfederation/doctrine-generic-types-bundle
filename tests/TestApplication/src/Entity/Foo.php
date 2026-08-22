@@ -9,10 +9,13 @@ use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\CustomValue
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\OtherValue\Age;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\Amount;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\Count;
+use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\ExternalCode;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\FirstName;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\IsActive;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\IsExpired;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\LastName;
+use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\OpeningTime;
+use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\RetentionPeriod;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\SuccessRate;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\UserId;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\ValueWithoutGenericType\HeightInCm;
@@ -47,6 +50,12 @@ final class Foo
         public HeightInCm $heightInCm,
         #[ORM\Column(type: Price::class)]
         public Price $price,
+        #[ORM\Column(type: ExternalCode::class, length: 32)]
+        public ExternalCode $externalCode,
+        #[ORM\Column(type: OpeningTime::class)]
+        public OpeningTime $openingTime,
+        #[ORM\Column(type: RetentionPeriod::class)]
+        public RetentionPeriod $retentionPeriod,
     ) {
     }
 }

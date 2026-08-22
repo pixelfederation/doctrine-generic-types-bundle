@@ -104,7 +104,7 @@ The bundle provides these base value classes and matching Doctrine types:
 | `AsciiStringValue`      | `AsciiStringValueType`      | ASCII `string`              | `length`                |
 | `BooleanValue`          | `BooleanValueType`          | `bool`                      | —                       |
 | `IntegerValue`          | `IntegerValueType`          | `int`                       | —                       |
-| `BigIntegerValue`       | `BigIntegerValueType`       | `int\| string`              | —                       |
+| `BigIntegerValue`       | `BigIntegerValueType`       | `int` or integer `string`   | —                       |
 | `FloatValue`            | `FloatValueType`            | `float`                     | —                       |
 | `DecimalValue`          | `DecimalValueType`          | numeric `string`            | `precision` and `scale` |
 | `StringValue`           | `StringValueType`           | `string`                    | `length`                |
@@ -116,12 +116,14 @@ The bundle provides these base value classes and matching Doctrine types:
 | `JsonSerializableValue` | `JsonSerializableValueType` | result of `jsonSerialize()` | —                       |
 | `NativeJsonValue`       | `NativeJsonValueType`       | `mixed`                     | —                       |
 
-`BigIntegerValue` accepts integers and numeric strings so that values outside PHP's integer range remain exact.
+`BigIntegerValue` accepts integers and signed decimal integer strings so that values outside PHP's integer range
+remain exact.
 `DecimalValue` accepts numeric strings to avoid floating-point precision loss. Decimal entity fields must declare
 their precision and scale, for example `#[ORM\Column(type: Price::class, precision: 10, scale: 2)]`.
 `AsciiStringValue` rejects non-ASCII characters and, like `StringValue`, requires an explicit column length.
-`TimeValue` represents a time of day without a date or timezone. `DateIntervalValue` delegates Doctrine's portable
-ISO-8601 interval representation to the native DBAL `dateinterval` type.
+`TimeValue` represents a time of day without a date or timezone; DBAL hydrates its `DateTimeImmutable` value with
+`1970-01-01` as the date. `DateIntervalValue` delegates Doctrine's portable ISO-8601 interval representation to the
+native DBAL `dateinterval` type.
 
 ## JSON values
 
@@ -283,9 +285,32 @@ Serializer output becomes part of the database format. Changes to property names
 normalizers, handlers, or serializer metadata may therefore require a data migration. Keep serializer configuration
 used for persistence stable and ensure that it can reconstruct readonly constructors and nested value objects.
 
+## Ramsey UUID bridge
+
+Install Ramsey UUID:
+
+```bash
+composer require ramsey/uuid
+```
+
+Extend the Ramsey `UuidValue` base and map its hierarchy to the GUID-backed `UuidValueType`:
+
+```php
+use PixelFederation\DoctrineGenericTypesBundle\Bridge\RamseyUuid\Doctrine\Type\UuidValueType;
+use PixelFederation\DoctrineGenericTypesBundle\Bridge\RamseyUuid\Value\UuidValue;
+
+'generic_types' => [
+    UuidValue::class => UuidValueType::class,
+],
+```
+
 ## Symfony UID bridge
 
 The optional Symfony UID bridge provides UUID and ULID value bases with two storage strategies each:
+
+```bash
+composer require symfony/uid symfony/doctrine-bridge
+```
 
 - `UuidValueType` delegates to Symfony's Doctrine UUID type. It uses a native GUID where supported and a fixed
   16-byte binary column otherwise.

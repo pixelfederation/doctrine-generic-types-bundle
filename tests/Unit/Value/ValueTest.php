@@ -79,6 +79,17 @@ final class ValueTest extends TestCase
     }
 
     /**
+     * @return iterable<string, array{string}>
+     */
+    public static function invalidBigIntegerProvider(): iterable
+    {
+        yield 'non-numeric' => ['not-a-number'];
+        yield 'decimal' => ['1.5'];
+        yield 'scientific notation' => ['1e3'];
+        yield 'whitespace' => [' 12'];
+    }
+
+    /**
      * @param class-string<BaseValue<mixed>> $valueClass
      */
     #[DataProvider('scalarValueProvider')]
@@ -101,11 +112,12 @@ final class ValueTest extends TestCase
         $valueClass::fromDbValue($dbValue);
     }
 
-    public function testBigIntegerRejectsNonNumericString(): void
+    #[DataProvider('invalidBigIntegerProvider')]
+    public function testBigIntegerRejectsNonIntegerString(string $value): void
     {
         $this->expectException(InvalidValueFormatException::class);
 
-        new TestBigIntegerValue('not-a-number');
+        new TestBigIntegerValue($value);
     }
 
     public function testDecimalRejectsNonNumericString(): void

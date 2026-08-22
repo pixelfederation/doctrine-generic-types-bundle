@@ -33,7 +33,7 @@ final class DoctrineSchemaValidateTest extends KernelTestCase
         $commandTester->assertCommandIsSuccessful();
         $output = $commandTester->getDisplay();
         self::assertSame(
-            'CREATE TABLE foo (userId CHAR(36) NOT NULL, firstName VARCHAR(255) NOT NULL, lastName VARCHAR(255) NOT NULL, isActive BOOLEAN NOT NULL, isExpired BOOLEAN NOT NULL, amount INTEGER NOT NULL, count INTEGER NOT NULL, successRate DOUBLE PRECISION NOT NULL, age INTEGER NOT NULL, heightInCm INTEGER NOT NULL, price CLOB NOT NULL, PRIMARY KEY (userId));
+            'CREATE TABLE foo (userId CHAR(36) NOT NULL, firstName VARCHAR(255) NOT NULL, lastName VARCHAR(255) NOT NULL, isActive BOOLEAN NOT NULL, isExpired BOOLEAN NOT NULL, amount INTEGER NOT NULL, count INTEGER NOT NULL, successRate DOUBLE PRECISION NOT NULL, age INTEGER NOT NULL, heightInCm INTEGER NOT NULL, price CLOB NOT NULL, externalCode VARCHAR(32) NOT NULL, openingTime TIME NOT NULL, retentionPeriod VARCHAR(255) NOT NULL, PRIMARY KEY (userId));
 CREATE INDEX is_active_idx ON foo (isActive);
 CREATE UNIQUE INDEX name_unique_idx ON foo (firstName, lastName);
 ',

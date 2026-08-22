@@ -17,8 +17,8 @@ abstract readonly class BigIntegerValue implements BaseValue
     public function __construct(
         protected int|string $value,
     ) {
-        if (is_string($value) && !is_numeric($value)) {
-            throw new InvalidValueFormatException($value, static::class, 'numeric string');
+        if (is_string($value) && preg_match('/^[+-]?\d+$/D', $value) !== 1) {
+            throw new InvalidValueFormatException($value, static::class, 'integer string');
         }
     }
 

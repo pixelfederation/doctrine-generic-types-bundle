@@ -39,7 +39,7 @@ All notable changes to this project are documented in this file.
 
 - Added value bases and matching Doctrine types for `BIGINT`, exact `DECIMAL`, `TEXT`/CLOB, ASCII strings, immutable
   `TIME`, and `DATEINTERVAL` mappings: `BigIntegerValue`, `DecimalValue`, `LongTextValue`, `AsciiStringValue`,
-  `TimeValue`, and `DateIntervalValue`.
+  `TimeValue`, and `DateIntervalValue`. Big integers accept only integers or signed decimal integer strings.
 - Added immutable `DateValue` and `DateTimeValue` mappings for native Doctrine `DATE` and `DATETIME` values.
 - Added two JSON mapping strategies. `JsonSerializableValue` and `JsonSerializableValueType` provide explicit
   serialization through `JsonSerializable` and require concrete values to implement hydration through

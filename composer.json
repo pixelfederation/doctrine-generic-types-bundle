@@ -1,8 +1,14 @@
 {
   "name": "pixelfederation/doctrine-generic-types-bundle",
-  "description": "Symfony bundle for Doctrine Generic Types.",
+  "description": "Map value-object hierarchies to Doctrine DBAL types in Symfony applications.",
   "license": "MIT",
   "type": "symfony-bundle",
+  "keywords": [
+    "dbal",
+    "doctrine",
+    "symfony",
+    "value object"
+  ],
   "authors": [
     {
       "name": "Martin Škorupa",

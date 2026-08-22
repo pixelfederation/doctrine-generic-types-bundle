@@ -204,6 +204,18 @@ final class PixelFederationDoctrineGenericTypesExtensionTest extends AbstractExt
         ]);
     }
 
+    public function testGenericTypeMappingRejectsClassThatIsNotValue(): void
+    {
+        $this->expectException(InvalidConfigurationException::class);
+        $this->expectExceptionMessage('must implement ' . Value::class);
+
+        $this->load([
+            'generic_types' => [
+                self::class => StringValueType::class,
+            ],
+        ]);
+    }
+
     /**
      * @param array<string, string> $genericTypes
      * @param array<string> $directories

@@ -6,12 +6,14 @@ namespace PixelFederation\DoctrineGenericTypesBundle\Tests\Unit\Doctrine\Type;
 
 use Doctrine\DBAL\Platforms\SQLitePlatform;
 use Doctrine\DBAL\Types\Exception\InvalidFormat;
+use Doctrine\DBAL\Types\Exception\InvalidType;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use PixelFederation\DoctrineGenericTypesBundle\Bridge\SymfonyUid\Doctrine\Type\UlidChar26Type;
 use PixelFederation\DoctrineGenericTypesBundle\Bridge\SymfonyUid\Doctrine\Type\UlidValueChar26Type;
 use PixelFederation\DoctrineGenericTypesBundle\Bridge\SymfonyUid\Doctrine\Type\UlidValueType;
 use PixelFederation\DoctrineGenericTypesBundle\Bridge\SymfonyUid\Value\UlidValue;
+use PixelFederation\DoctrineGenericTypesBundle\Exception\InvalidDatabaseTypeException;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\Unit\Value\TestSymfonyUlidValue;
 use Symfony\Component\Uid\Ulid;
 
@@ -55,5 +57,37 @@ final class SymfonyUlidValueTypeTest extends TestCase
         $this->expectException(InvalidFormat::class);
 
         $type->convertToPHPValue('invalid', new SQLitePlatform());
+    }
+
+    public function testChar26UlidTypeHandlesNullAndUlidInstance(): void
+    {
+        $type = new UlidChar26Type();
+        $platform = new SQLitePlatform();
+        $ulid = Ulid::fromString(self::ULID);
+
+        self::assertNull($type->convertToDatabaseValue(null, $platform));
+        self::assertNull($type->convertToPHPValue(null, $platform));
+        self::assertSame($ulid, $type->convertToPHPValue($ulid, $platform));
+    }
+
+    public function testChar26UlidTypeRejectsInvalidDatabaseInput(): void
+    {
+        $this->expectException(InvalidType::class);
+
+        new UlidChar26Type()->convertToDatabaseValue(self::ULID, new SQLitePlatform());
+    }
+
+    public function testChar26UlidTypeRejectsInvalidPHPInput(): void
+    {
+        $this->expectException(InvalidType::class);
+
+        new UlidChar26Type()->convertToPHPValue(12, new SQLitePlatform());
+    }
+
+    public function testUlidValueRejectsInvalidDatabaseType(): void
+    {
+        $this->expectException(InvalidDatabaseTypeException::class);
+
+        TestSymfonyUlidValue::fromDbValue(self::ULID);
     }
 }

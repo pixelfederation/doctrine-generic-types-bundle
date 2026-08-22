@@ -6,12 +6,14 @@ namespace PixelFederation\DoctrineGenericTypesBundle\Tests\Unit\Doctrine\Type;
 
 use Doctrine\DBAL\Platforms\SQLitePlatform;
 use Doctrine\DBAL\Types\Exception\InvalidFormat;
+use Doctrine\DBAL\Types\Exception\InvalidType;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use PixelFederation\DoctrineGenericTypesBundle\Bridge\SymfonyUid\Doctrine\Type\UuidChar36Type;
 use PixelFederation\DoctrineGenericTypesBundle\Bridge\SymfonyUid\Doctrine\Type\UuidValueChar36Type;
 use PixelFederation\DoctrineGenericTypesBundle\Bridge\SymfonyUid\Doctrine\Type\UuidValueType;
 use PixelFederation\DoctrineGenericTypesBundle\Bridge\SymfonyUid\Value\UuidValue;
+use PixelFederation\DoctrineGenericTypesBundle\Exception\InvalidDatabaseTypeException;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\Unit\Value\TestSymfonyUuidValue;
 use Symfony\Component\Uid\Uuid;
 
@@ -61,5 +63,37 @@ final class SymfonyUuidValueTypeTest extends TestCase
         $this->expectException(InvalidFormat::class);
 
         $type->convertToPHPValue('550e8400e29b41d4a716446655440000', new SQLitePlatform());
+    }
+
+    public function testChar36UuidTypeHandlesNullAndUuidInstance(): void
+    {
+        $type = new UuidChar36Type();
+        $platform = new SQLitePlatform();
+        $uuid = Uuid::fromString(self::UUID);
+
+        self::assertNull($type->convertToDatabaseValue(null, $platform));
+        self::assertNull($type->convertToPHPValue(null, $platform));
+        self::assertSame($uuid, $type->convertToPHPValue($uuid, $platform));
+    }
+
+    public function testChar36UuidTypeRejectsInvalidDatabaseInput(): void
+    {
+        $this->expectException(InvalidType::class);
+
+        new UuidChar36Type()->convertToDatabaseValue(self::UUID, new SQLitePlatform());
+    }
+
+    public function testChar36UuidTypeRejectsInvalidPHPInput(): void
+    {
+        $this->expectException(InvalidType::class);
+
+        new UuidChar36Type()->convertToPHPValue(12, new SQLitePlatform());
+    }
+
+    public function testUuidValueRejectsInvalidDatabaseType(): void
+    {
+        $this->expectException(InvalidDatabaseTypeException::class);
+
+        TestSymfonyUuidValue::fromDbValue(self::UUID);
     }
 }
