@@ -28,7 +28,7 @@ final class SymfonySerializerValueType extends BaseSerializerValueType
     }
 
     #[Override]
-    protected function deserialize(string $value, string $valueClass): object
+    protected function deserialize(string $value, string $valueClass): mixed
     {
         return $this->serializer->deserialize($value, $valueClass, 'json');
     }
