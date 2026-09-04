@@ -7,7 +7,7 @@ namespace PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Other
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Exception\InvalidAgeException;
 use PixelFederation\DoctrineGenericTypesBundle\Value\IntegerValue;
 
-final class Age extends IntegerValue
+final readonly class Age extends IntegerValue
 {
     public function __construct(
         int $value,

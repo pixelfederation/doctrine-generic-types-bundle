@@ -8,7 +8,7 @@ use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Types\TypeRegistry;
 use Override;
 
-final class DefaultTypeRegistryProvider implements TypeRegistryProviderInterface
+final class DefaultTypeRegistryProvider implements TypeRegistryProvider
 {
     #[Override]
     public function provide(): TypeRegistry

@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type;
 
-use Doctrine\DBAL\Platforms\AbstractPlatform;
+use Doctrine\DBAL\Types\StringType;
+use Doctrine\DBAL\Types\Type;
 use Override;
 use PixelFederation\DoctrineGenericTypesBundle\Value\StringValue;
 
@@ -14,16 +15,17 @@ use PixelFederation\DoctrineGenericTypesBundle\Value\StringValue;
 final class StringValueType extends BaseGenericType
 {
     /**
-     * @psalm-suppress InvalidClassConstantType
-     */
-    protected const string ABSTRACT_VALUE = StringValue::class;
-
-    /**
-     * @inheritDoc
+     * @return class-string<StringValue>
      */
     #[Override]
-    public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
+    protected static function getAbstractValueClass(): string
     {
-        return $platform->getStringTypeDeclarationSQL($column);
+        return StringValue::class;
+    }
+
+    #[Override]
+    protected static function createDoctrineType(): Type
+    {
+        return new StringType();
     }
 }

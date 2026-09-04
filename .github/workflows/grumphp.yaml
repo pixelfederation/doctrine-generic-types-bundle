@@ -10,17 +10,95 @@ on:
       - main
 
 jobs:
+  production-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      matrix:
+        php-version: [ '8.5' ]
+        symfony-version: [ '7.4.*', '8.1.*' ]
+        dependencies: [ 'highest' ]
+        include:
+          - php-version: '8.5'
+            symfony-version: '7.4.*'
+            dependencies: 'lowest'
+
+    steps:
+      - name: Checkout current repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup .env file
+        run: echo "php-container=generics-php${{ matrix.php-version }}" >> $GITHUB_ENV
+
+      - name: Start containers
+        run: docker compose -f compose.yaml up -d ${{ env.php-container }}
+
+      - name: Check PHP Version
+        run: docker exec ${{ env.php-container }} php -v
+
+      - name: Validate composer.json
+        run: docker exec ${{ env.php-container }} composer validate --strict --no-check-lock
+
+      - name: Symfony version
+        run: docker exec ${{ env.php-container }} composer config extra.symfony.require ${{ matrix.symfony-version }}
+
+      - name: Resolve dependency versions
+        run: |
+          if [ "${{ matrix.dependencies }}" = "lowest" ]; then
+            docker exec ${{ env.php-container }} composer update \
+              --prefer-lowest \
+              --prefer-stable \
+              --prefer-dist \
+              --no-interaction
+          else
+            docker exec ${{ env.php-container }} composer update \
+              --prefer-dist \
+              --no-interaction
+          fi
+
+      - name: Install production dependencies
+        run: >-
+          docker exec ${{ env.php-container }} composer install
+          --no-dev
+          --prefer-dist
+          --no-interaction
+          --no-progress
+
+      - name: Check production platform requirements
+        run: docker exec ${{ env.php-container }} composer check-platform-reqs --no-dev
+
+      - name: Check bundle autoloading
+        run: >-
+          docker exec ${{ env.php-container }} php -r
+          "require 'vendor/autoload.php';
+          exit(class_exists(PixelFederation\\DoctrineGenericTypesBundle\\PixelFederationDoctrineGenericTypesBundle::class)
+          ? 0 : 1);"
+
+      - name: Check optional Ramsey UUID dependency
+        run: >-
+          ! docker exec ${{ env.php-container }} composer show ramsey/uuid
+          --no-interaction
+
+      - name: Stop containers
+        if: always()
+        run: docker compose -f compose.yaml down -v
+
   composer-grumphp:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
       matrix:
-        php-version: [ '8.3', '8.4' ]
-#        symfony-version: [ '7.3.*' ]
+        php-version: [ '8.5' ]
+        symfony-version: [ '7.4.*', '8.1.*' ]
+        dependencies: [ 'highest' ]
+        include:
+          - php-version: '8.5'
+            symfony-version: '7.4.*'
+            dependencies: 'lowest'
 
     steps:
       - name: Checkout current repo
-        uses: actions/checkout@v5
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup .env file
         run: echo "php-container=generics-php${{ matrix.php-version }}" >> $GITHUB_ENV
@@ -34,20 +112,25 @@ jobs:
       - name: Validate composer.json
         run: docker exec ${{ env.php-container }} composer validate --strict --no-check-lock
 
-#      - name: Symfony version
-#        run: docker exec ${{ env.php-container }} composer config extra.symfony.require ${{ matrix.symfony-version }}
+      - name: Symfony version
+        run: docker exec ${{ env.php-container }} composer config extra.symfony.require ${{ matrix.symfony-version }}
 
       - name: Composer update
-        run: docker exec ${{ env.php-container }} composer update --prefer-dist --no-interaction
+        run: |
+          if [ "${{ matrix.dependencies }}" = "lowest" ]; then
+            docker exec ${{ env.php-container }} composer update \
+              --prefer-lowest \
+              --prefer-stable \
+              --prefer-dist \
+              --no-interaction
+          else
+            docker exec ${{ env.php-container }} composer update \
+              --prefer-dist \
+              --no-interaction
+          fi
 
       - name: Run static analysis (GrumPHP)
         run: docker exec ${{ env.php-container }} php vendor/bin/grumphp run --testsuite=php${{ matrix.php-version }}
-
-#      - name: Upload coverage to Codecov
-#        uses: codecov/codecov-action@v4
-#        with:
-#          files: ./path/to/coverage.xml
-#          token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Stop containers
         if: always()

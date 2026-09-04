@@ -12,10 +12,10 @@ use PixelFederation\DoctrineGenericTypesBundle\Value\BaseValue;
 /**
  * @implements BaseValue<int>
  */
-final class HeightInCm implements BaseValue
+final readonly class HeightInCm implements BaseValue
 {
     public function __construct(
-        public readonly int $value,
+        public int $value,
     ) {
         if ($value < 0) {
             throw InvalidHeightInCmException::lessThanZero($value);

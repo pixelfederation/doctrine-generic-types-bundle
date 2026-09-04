@@ -4,29 +4,22 @@ x-php-common: &php_common
     - .:/srv/www:delegated
   environment:
     COMPOSER_MEMORY_LIMIT: -1
+    XDEBUG_MODE: off
 
 x-php-build: &php_build
   context: ./
   dockerfile: ./docker/php/Dockerfile
 
 services:
-  generics-php8.3:
+  generics-php8.5:
     <<: *php_common
-    container_name: generics-php8.3
+    container_name: generics-php8.5
     build:
       <<: *php_build
       args:
-        PHP_VERSION: 8.3
-
-  generics-php8.4:
-    <<: *php_common
-    container_name: generics-php8.4
-    build:
-      <<: *php_build
-      args:
-        PHP_VERSION: 8.4
+        PHP_VERSION: 8.5
 
   generics-php-min:
     extends:
-      service: generics-php8.3
+      service: generics-php8.5
     container_name: generics-php-min

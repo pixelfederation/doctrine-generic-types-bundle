@@ -9,31 +9,30 @@ use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\CustomValue
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\OtherValue\Age;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\Amount;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\Count;
+use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\ExternalCode;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\FirstName;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\IsActive;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\IsExpired;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\LastName;
+use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\OpeningTime;
+use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\RetentionPeriod;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\SuccessRate;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\UserId;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\ValueWithoutGenericType\HeightInCm;
 
-/**
- * @SuppressWarnings("PHPMD.ExcessiveParameterList")
- */
 #[ORM\Entity]
 #[ORM\Table(name: 'foo')]
 #[ORM\UniqueConstraint(name: 'name_unique_idx', columns: ['firstName', 'lastName'])]
 #[ORM\Index(name: 'is_active_idx', fields: ['isActive'])]
-// phpcs:ignore SlevomatCodingStandard.Classes.RequireAbstractOrFinal.ClassNeitherAbstractNorFinal
-class Foo
+final class Foo
 {
     public function __construct(
         #[ORM\Id]
         #[ORM\Column(type: UserId::class)]
         public UserId $userId,
-        #[ORM\Column(type: FirstName::class)]
+        #[ORM\Column(type: FirstName::class, length: 255)]
         public FirstName $firstName,
-        #[ORM\Column(type: LastName::class)]
+        #[ORM\Column(type: LastName::class, length: 255)]
         public LastName $lastName,
         #[ORM\Column(type: IsActive::class)]
         public IsActive $isActive,
@@ -51,6 +50,12 @@ class Foo
         public HeightInCm $heightInCm,
         #[ORM\Column(type: Price::class)]
         public Price $price,
+        #[ORM\Column(type: ExternalCode::class, length: 32)]
+        public ExternalCode $externalCode,
+        #[ORM\Column(type: OpeningTime::class)]
+        public OpeningTime $openingTime,
+        #[ORM\Column(type: RetentionPeriod::class)]
+        public RetentionPeriod $retentionPeriod,
     ) {
     }
 }

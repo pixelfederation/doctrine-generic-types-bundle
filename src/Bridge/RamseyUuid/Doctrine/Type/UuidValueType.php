@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace PixelFederation\DoctrineGenericTypesBundle\Bridge\RamseyUuid\Doctrine\Type;
 
-use Doctrine\DBAL\Platforms\AbstractPlatform;
+use Doctrine\DBAL\Types\GuidType;
+use Doctrine\DBAL\Types\Type;
 use Override;
 use PixelFederation\DoctrineGenericTypesBundle\Bridge\RamseyUuid\Value\UuidValue;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\BaseGenericType;
@@ -15,19 +16,17 @@ use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\BaseGenericType;
 final class UuidValueType extends BaseGenericType
 {
     /**
-     * @psalm-suppress InvalidClassConstantType
-     */
-    protected const string ABSTRACT_VALUE = UuidValue::class;
-
-    /**
-     * @inheritDoc
+     * @return class-string<UuidValue>
      */
     #[Override]
-    public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
+    protected static function getAbstractValueClass(): string
     {
-        $column['length'] = 36;
-        $column['fixed'] = true;
+        return UuidValue::class;
+    }
 
-        return $platform->getStringTypeDeclarationSQL($column);
+    #[Override]
+    protected static function createDoctrineType(): Type
+    {
+        return new GuidType();
     }
 }

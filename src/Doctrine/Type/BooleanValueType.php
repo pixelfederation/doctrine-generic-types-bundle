@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type;
 
-use Doctrine\DBAL\ParameterType;
-use Doctrine\DBAL\Platforms\AbstractPlatform;
+use Doctrine\DBAL\Types\BooleanType;
+use Doctrine\DBAL\Types\Type;
 use Override;
 use PixelFederation\DoctrineGenericTypesBundle\Value\BooleanValue;
 
@@ -15,42 +15,17 @@ use PixelFederation\DoctrineGenericTypesBundle\Value\BooleanValue;
 final class BooleanValueType extends BaseGenericType
 {
     /**
-     * @psalm-suppress InvalidClassConstantType
-     */
-    protected const string ABSTRACT_VALUE = BooleanValue::class;
-
-    /**
-     * @inheritdoc
+     * @return class-string<BooleanValue>
      */
     #[Override]
-    public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
+    protected static function getAbstractValueClass(): string
     {
-        return $platform->getBooleanTypeDeclarationSQL($column);
+        return BooleanValue::class;
     }
 
     #[Override]
-    public function convertToDatabaseValue(mixed $value, AbstractPlatform $platform): mixed
+    protected static function createDoctrineType(): Type
     {
-        /**
-         * @psalm-suppress MixedAssignment
-         */
-        $dbValue = parent::convertToDatabaseValue($value, $platform);
-        if ($dbValue === null) {
-            return null;
-        }
-
-        return $platform->convertBooleans($dbValue);
-    }
-
-    #[Override]
-    public function convertToPHPValue(mixed $value, AbstractPlatform $platform): mixed
-    {
-        return parent::convertToPHPValue($platform->convertFromBoolean($value), $platform);
-    }
-
-    #[Override]
-    public function getBindingType(): int
-    {
-        return ParameterType::BOOLEAN;
+        return new BooleanType();
     }
 }

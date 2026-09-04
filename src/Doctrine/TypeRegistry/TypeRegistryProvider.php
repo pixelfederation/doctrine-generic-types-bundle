@@ -6,7 +6,7 @@ namespace PixelFederation\DoctrineGenericTypesBundle\Doctrine\TypeRegistry;
 
 use Doctrine\DBAL\Types\TypeRegistry;
 
-interface TypeRegistryProviderInterface
+interface TypeRegistryProvider
 {
     public function provide(): TypeRegistry;
 }

@@ -18,6 +18,7 @@ use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\FloatValueType;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\GenericType;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\IntegerValueType;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\StringValueType;
+use PixelFederation\DoctrineGenericTypesBundle\Doctrine\TypeRegistry\GenericTypeFactoryProvider;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\CustomValue\MoneyValue;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\CustomValue\Price;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Doctrine\Type\MoneyValueType;
@@ -30,11 +31,14 @@ use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\IsExp
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\LastName;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\SuccessRate;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\UserId;
+use PixelFederation\DoctrineGenericTypesBundle\Value\BaseValue;
 use PixelFederation\DoctrineGenericTypesBundle\Value\BooleanValue;
 use PixelFederation\DoctrineGenericTypesBundle\Value\FloatValue;
 use PixelFederation\DoctrineGenericTypesBundle\Value\IntegerValue;
 use PixelFederation\DoctrineGenericTypesBundle\Value\StringValue;
 use PixelFederation\DoctrineGenericTypesBundle\Value\Value;
+use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
+use Symfony\Component\DependencyInjection\Reference;
 
 #[CoversClass(PixelFederationDoctrineGenericTypesExtension::class)]
 #[CoversClass(Configuration::class)]
@@ -119,13 +123,101 @@ final class PixelFederationDoctrineGenericTypesExtensionTest extends AbstractExt
                     UserId::class => UuidValueType::class,
                 ],
             ],
+            'last_matching_generic_type_wins' => [
+                'genericTypes' => [
+                    BaseValue::class => BooleanValueType::class,
+                    IntegerValue::class => IntegerValueType::class,
+                ],
+                'directories' => [
+                    './tests/TestApplication/src/OtherValue',
+                ],
+                'mapping' => [
+                    Age::class => IntegerValueType::class,
+                ],
+            ],
+            'mapping_priority_follows_configuration_order' => [
+                'genericTypes' => [
+                    IntegerValue::class => IntegerValueType::class,
+                    BaseValue::class => BooleanValueType::class,
+                ],
+                'directories' => [
+                    './tests/TestApplication/src/OtherValue',
+                ],
+                'mapping' => [
+                    Age::class => BooleanValueType::class,
+                ],
+            ],
         ];
     }
 
     public function testEmptyConfig(): void
     {
-        $this->expectNotToPerformAssertions();
         $this->load();
+
+        $this->assertContainerBuilderHasParameter(
+            'pixel_federation.doctrine_generic_types.generic_types_mapping',
+            [],
+        );
+    }
+
+    public function testStaticGenericTypeFactoryHasDefaultPriority(): void
+    {
+        $this->load();
+
+        $factory = $this->container->getDefinition(
+            'pixel_federation.doctrine_generic_types.static_generic_type_factory',
+        );
+
+        self::assertSame(
+            [['priority' => GenericTypeFactoryProvider::DEFAULT_PRIORITY]],
+            $factory->getTag(GenericTypeFactoryProvider::TAG),
+        );
+    }
+
+    public function testSerializerBridgeConfiguration(): void
+    {
+        $serializerBridges = [
+            'symfony' => ['service' => 'app.serializer.symfony'],
+            'jms' => ['service' => 'app.serializer.jms'],
+        ];
+
+        $this->load(['serializer_bridges' => $serializerBridges]);
+
+        $symfonyFactory = $this->container->getDefinition(
+            'pixel_federation.doctrine_generic_types.symfony_serializer_generic_type_factory',
+        );
+        $jmsFactory = $this->container->getDefinition(
+            'pixel_federation.doctrine_generic_types.jms_serializer_generic_type_factory',
+        );
+
+        self::assertEquals(new Reference('app.serializer.symfony'), $symfonyFactory->getArgument('$serializer'));
+        self::assertEquals(new Reference('app.serializer.jms'), $jmsFactory->getArgument('$serializer'));
+        $factoryTag = [['priority' => GenericTypeFactoryProvider::DEFAULT_PRIORITY]];
+        self::assertSame($factoryTag, $symfonyFactory->getTag(GenericTypeFactoryProvider::TAG));
+        self::assertSame($factoryTag, $jmsFactory->getTag(GenericTypeFactoryProvider::TAG));
+    }
+
+    public function testSerializerBridgeRequiresServiceId(): void
+    {
+        $this->expectException(InvalidConfigurationException::class);
+
+        $this->load([
+            'serializer_bridges' => [
+                'symfony' => [],
+            ],
+        ]);
+    }
+
+    public function testGenericTypeMappingRejectsClassThatIsNotValue(): void
+    {
+        $this->expectException(InvalidConfigurationException::class);
+        $this->expectExceptionMessage('must implement ' . Value::class);
+
+        $this->load([
+            'generic_types' => [
+                self::class => StringValueType::class,
+            ],
+        ]);
     }
 
     /**

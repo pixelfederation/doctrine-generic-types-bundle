@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PixelFederation\DoctrineGenericTypesBundle\Exception;
 
 use Doctrine\DBAL\Types\ConversionException;
+use Doctrine\DBAL\Types\Exception\InvalidFormat;
 use InvalidArgumentException;
 use Override;
 use Throwable;
@@ -34,7 +35,7 @@ final class InvalidValueFormatException extends InvalidArgumentException impleme
     #[Override]
     public function toConversionException(): ConversionException
     {
-        return ConversionException::conversionFailedFormat(
+        return InvalidFormat::new(
             $this->value,
             $this->toType,
             $this->expectedFormat,

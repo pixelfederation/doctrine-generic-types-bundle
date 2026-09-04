@@ -1,8 +1,14 @@
 {
   "name": "pixelfederation/doctrine-generic-types-bundle",
-  "description": "Symfony bundle for Doctrine Generic Types.",
+  "description": "Map value-object hierarchies to Doctrine DBAL types in Symfony applications.",
   "license": "MIT",
   "type": "symfony-bundle",
+  "keywords": [
+    "dbal",
+    "doctrine",
+    "symfony",
+    "value object"
+  ],
   "authors": [
     {
       "name": "Martin Škorupa",
@@ -11,32 +17,40 @@
   ],
   "homepage": "https://github.com/pixelfederation/doctrine-generic-types-bundle",
   "require": {
-    "php": "^8.3",
-    "composer/class-map-generator": "^1.6",
-    "doctrine/dbal": "^3",
-    "doctrine/doctrine-bundle": "^2.16",
-    "doctrine/orm": "^3.5",
-    "symfony/dotenv": "^7.3",
-    "symfony/expression-language": "^7.3",
-    "symfony/http-kernel": "^7.3",
-    "symfony/yaml": "^7.3"
+    "php": "^8.5",
+    "composer/class-map-generator": "^1.7",
+    "doctrine/dbal": "^4.4",
+    "doctrine/doctrine-bundle": "^3.3",
+    "symfony/http-kernel": "^7.4 || ^8.1"
   },
   "require-dev": {
-    "dama/doctrine-test-bundle": "^8.4",
-    "ergebnis/composer-normalize": "^2.48",
+    "dama/doctrine-test-bundle": "^8.6",
+    "doctrine/orm": "^3.5",
+    "ergebnis/composer-normalize": "^2.52",
     "friendsofphp/php-cs-fixer": "^3.89",
     "jms/serializer": "^3.32",
     "matthiasnoback/symfony-dependency-injection-test": "^6.1",
     "php-parallel-lint/php-parallel-lint": "^1.4",
-    "phpmd/phpmd": "^2.15",
-    "phpro/grumphp": "^2.17",
-    "phpstan/phpstan": "^2.1",
-    "pixelfederation/coding-standards": "^5.0",
-    "psalm/phar": "^6.13",
+    "phpro/grumphp": "^2.23",
+    "phpstan/phpstan": "^2.2",
+    "phpunit/phpunit": "^13.3",
+    "pixelfederation/coding-standards": "^5.5",
+    "psalm/phar": "^6.16",
     "ramsey/uuid": "^4.9",
     "roave/security-advisories": "dev-latest",
-    "symfony/phpunit-bridge": "^7.3",
-    "symfony/test-pack": "^1.2"
+    "symfony/dotenv": "^7.4 || ^8.1",
+    "symfony/flex": "^2.11",
+    "symfony/phpunit-bridge": "^7.4 || ^8.1",
+    "symfony/property-access": "^7.4 || ^8.1",
+    "symfony/serializer": "^7.4 || ^8.1",
+    "symfony/uid": "^7.4 || ^8.1"
+  },
+  "suggest": {
+    "jms/serializer-bundle": "Required when using the JMS Serializer value and Doctrine type bridge in Symfony.",
+    "ramsey/uuid": "Required when using the Ramsey UUID value and Doctrine type bridge.",
+    "symfony/doctrine-bridge": "Required when using the Symfony UID Doctrine type bridge.",
+    "symfony/serializer": "Required when using the Symfony Serializer value and Doctrine type bridge.",
+    "symfony/uid": "Required when using the Symfony UID value and Doctrine type bridge."
   },
   "minimum-stability": "stable",
   "prefer-stable": true,
@@ -55,8 +69,12 @@
     "allow-plugins": {
       "dealerdirect/phpcodesniffer-composer-installer": true,
       "ergebnis/composer-normalize": true,
-      "phpro/grumphp": true
+      "phpro/grumphp": true,
+      "symfony/flex": true
     },
     "sort-packages": true
+  },
+  "scripts": {
+    "generate:coverage": "XDEBUG_MODE=coverage phpunit --coverage-html coverage"
   }
 }

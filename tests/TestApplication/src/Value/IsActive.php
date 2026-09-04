@@ -6,6 +6,6 @@ namespace PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value
 
 use PixelFederation\DoctrineGenericTypesBundle\Value\BooleanValue;
 
-final class IsActive extends BooleanValue
+final readonly class IsActive extends BooleanValue
 {
 }

@@ -9,12 +9,12 @@ use PixelFederation\DoctrineGenericTypesBundle\Bridge\RamseyUuid\Doctrine\Type\U
 use PixelFederation\DoctrineGenericTypesBundle\Command\ListCommand;
 use PixelFederation\DoctrineGenericTypesBundle\DependencyInjection\Configuration;
 use PixelFederation\DoctrineGenericTypesBundle\DependencyInjection\PixelFederationDoctrineGenericTypesExtension;
-use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Connection\ConnectionFactory;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\BooleanValueType;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\FloatValueType;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\IntegerValueType;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\StringValueType;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\TypeRegistry\GenericTypesRegistrator;
+use PixelFederation\DoctrineGenericTypesBundle\PixelFederationDoctrineGenericTypesBundle;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\CustomValue\Price;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Doctrine\Type\HeightInCmType;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Doctrine\Type\MoneyValueType;
@@ -30,16 +30,41 @@ use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\UserI
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\ValueWithoutGenericType\HeightInCm;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Symfony\Component\Console\Tester\ApplicationTester;
 use Symfony\Component\Console\Tester\CommandTester;
 
 #[CoversClass(ListCommand::class)]
 #[CoversClass(Configuration::class)]
 #[CoversClass(PixelFederationDoctrineGenericTypesExtension::class)]
-#[CoversClass(ConnectionFactory::class)]
 #[CoversClass(GenericTypesRegistrator::class)]
+#[CoversClass(PixelFederationDoctrineGenericTypesBundle::class)]
 final class ListCommandTest extends KernelTestCase
 {
     private const string ROW_PATTERN = ' %s %s %s %s';
+
+    public function testCommandIsListedWithDescription(): void
+    {
+        self::bootKernel();
+
+        $application = new Application(self::$kernel);
+        $application->setAutoExit(false);
+        $applicationTester = new ApplicationTester($application);
+        $applicationTester->run([
+            'command' => 'list',
+            'namespace' => 'pxfd:doctrine_generic_types',
+            '--raw' => true,
+        ]);
+
+        $applicationTester->assertCommandIsSuccessful();
+        self::assertStringContainsString(
+            'pxfd:doctrine_generic_types:list',
+            $applicationTester->getDisplay(),
+        );
+        self::assertStringContainsString(
+            'List all registered doctrine types',
+            $applicationTester->getDisplay(),
+        );
+    }
 
     public function testWithAll(): void
     {

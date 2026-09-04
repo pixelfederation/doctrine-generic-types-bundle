@@ -1,0 +1,40 @@
+<?php
+
+declare(strict_types=1);
+
+namespace PixelFederation\DoctrineGenericTypesBundle\Value;
+
+use Override;
+use PixelFederation\DoctrineGenericTypesBundle\Exception\InvalidDatabaseTypeException;
+use PixelFederation\DoctrineGenericTypesBundle\Exception\InvalidValueFormatException;
+
+/**
+ * @implements BaseValue<int|string>
+ * @psalm-consistent-constructor
+ */
+abstract readonly class BigIntegerValue implements BaseValue
+{
+    public function __construct(
+        protected int|string $value,
+    ) {
+        if (is_string($value) && preg_match('/^[+-]?\d+$/D', $value) !== 1) {
+            throw new InvalidValueFormatException($value, static::class, 'integer string');
+        }
+    }
+
+    #[Override]
+    public static function fromDbValue(mixed $dbValue): static
+    {
+        if (!is_int($dbValue) && !is_string($dbValue)) {
+            throw new InvalidDatabaseTypeException($dbValue, static::class, ['int', 'string']);
+        }
+
+        return new static($dbValue);
+    }
+
+    #[Override]
+    public function toDbValue(): int|string
+    {
+        return $this->value;
+    }
+}

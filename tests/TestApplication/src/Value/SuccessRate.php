@@ -7,7 +7,7 @@ namespace PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Exception\InvalidSuccessRateException;
 use PixelFederation\DoctrineGenericTypesBundle\Value\FloatValue;
 
-final class SuccessRate extends FloatValue
+final readonly class SuccessRate extends FloatValue
 {
     public function __construct(
         float $value,

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace PixelFederation\DoctrineGenericTypesBundle\DependencyInjection;
 
 use Override;
-use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
@@ -13,12 +12,12 @@ final class Configuration implements ConfigurationInterface
 {
     public const string CONFIGURATION_ROOT_NODE = 'pixel_federation_doctrine_generic_types';
 
+    /** @return TreeBuilder<'array'> */
     #[Override]
     public function getConfigTreeBuilder(): TreeBuilder
     {
         $treeBuilder = new TreeBuilder(self::CONFIGURATION_ROOT_NODE);
         $rootNode = $treeBuilder->getRootNode();
-        assert($rootNode instanceof ArrayNodeDefinition);
 
         $rootNode
             ->children()
@@ -31,6 +30,24 @@ final class Configuration implements ConfigurationInterface
                 ->arrayNode('directories')
                     ->useAttributeAsKey('path')
                     ->prototype('scalar');
+
+        $serializerBridges = $rootNode
+            ->children()
+                ->arrayNode('serializer_bridges')
+                    ->addDefaultsIfNotSet()
+                    ->children();
+
+        $serializerBridges->arrayNode('symfony')
+            ->children()
+                ->scalarNode('service')
+                    ->isRequired()
+                    ->cannotBeEmpty();
+
+        $serializerBridges->arrayNode('jms')
+            ->children()
+                ->scalarNode('service')
+                    ->isRequired()
+                    ->cannotBeEmpty();
 
         return $treeBuilder;
     }

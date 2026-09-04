@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace PixelFederation\DoctrineGenericTypesBundle\Command;
 
-use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\Persistence\ManagerRegistry;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type\GenericType;
-use PixelFederation\DoctrineGenericTypesBundle\Doctrine\TypeRegistry\TypeRegistryProviderInterface;
 use PixelFederation\DoctrineGenericTypesBundle\Value\Value;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\Option;
@@ -26,14 +24,10 @@ final class ListCommand extends Command
 {
     public function __construct(
         private readonly ManagerRegistry $registry,
-        private readonly TypeRegistryProviderInterface $typeRegistryProvider,
     ) {
         parent::__construct();
     }
 
-    /**
-     * @SuppressWarnings("PHPMD.BooleanArgumentFlag"))
-     */
     public function __invoke(
         SymfonyStyle $symfonyStyle,
         #[Option(
@@ -42,11 +36,11 @@ final class ListCommand extends Command
         )]
         bool $all = false,
     ): int {
-        $this->ensureGenericTypesRegistration();
+        $this->initializeDoctrineTypes();
 
         $table = $symfonyStyle->createTable();
         $table->setHeaders(['Value', 'Is Value', 'Type', 'Is Generic Type']);
-        $typesMap = $this->getTypesMap();
+        $typesMap = Type::getTypesMap();
         foreach ($typesMap as $name => $type) {
             $this->addTableRow($name, $type, $all, $table);
         }
@@ -89,31 +83,8 @@ final class ListCommand extends Command
         ];
     }
 
-    /**
-     * @see Type::getTypesMap()
-     * @return array<string, string>
-     */
-    private function getTypesMap(): array
+    private function initializeDoctrineTypes(): void
     {
-        $typeRepository = $this->typeRegistryProvider->provide();
-
-        /**
-         * @psalm-suppress InternalMethod
-         */
-        return array_map(
-            static function (Type $type): string {
-                return $type::class;
-            },
-            $typeRepository->getMap(),
-        );
-    }
-
-    private function ensureGenericTypesRegistration(): void
-    {
-        $connection = $this->registry->getConnection();
-        assert($connection instanceof Connection);
-        $platform = $connection->getDatabasePlatform();
-        $query = $platform->getDummySelectSQL();
-        $connection->executeQuery($query);
+        $this->registry->getConnection();
     }
 }

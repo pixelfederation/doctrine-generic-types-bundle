@@ -12,12 +12,12 @@ use Ramsey\Uuid\UuidInterface;
 use Stringable;
 
 /**
- * require https://github.com/ramsey/uuid
+ * Requires https://github.com/ramsey/uuid
  *
  * @implements BaseValue<UuidInterface>
  * @psalm-consistent-constructor
  */
-abstract class UuidValue implements BaseValue, Stringable
+abstract readonly class UuidValue implements BaseValue, Stringable
 {
     public function __construct(
         protected UuidInterface $value,

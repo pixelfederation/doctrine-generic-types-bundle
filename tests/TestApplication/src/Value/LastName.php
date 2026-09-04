@@ -6,6 +6,6 @@ namespace PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value
 
 use PixelFederation\DoctrineGenericTypesBundle\Value\StringValue;
 
-final class LastName extends StringValue
+final readonly class LastName extends StringValue
 {
 }

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type;
 
-use Doctrine\DBAL\ParameterType;
-use Doctrine\DBAL\Platforms\AbstractPlatform;
+use Doctrine\DBAL\Types\IntegerType;
+use Doctrine\DBAL\Types\Type;
 use Override;
 use PixelFederation\DoctrineGenericTypesBundle\Value\IntegerValue;
 
@@ -15,22 +15,17 @@ use PixelFederation\DoctrineGenericTypesBundle\Value\IntegerValue;
 final class IntegerValueType extends BaseGenericType
 {
     /**
-     * @psalm-suppress InvalidClassConstantType
-     */
-    protected const string ABSTRACT_VALUE = IntegerValue::class;
-
-    /**
-     * @inheritDoc
+     * @return class-string<IntegerValue>
      */
     #[Override]
-    public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
+    protected static function getAbstractValueClass(): string
     {
-        return $platform->getIntegerTypeDeclarationSQL($column);
+        return IntegerValue::class;
     }
 
     #[Override]
-    public function getBindingType(): int
+    protected static function createDoctrineType(): Type
     {
-        return ParameterType::INTEGER;
+        return new IntegerType();
     }
 }

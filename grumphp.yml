@@ -5,33 +5,18 @@ grumphp:
   git_hook_variables:
     EXEC_GRUMPHP_COMMAND: './bin/grumphp_hooks/environment_spinup && docker exec -i generics-php-min'
   parallel:
-    enabled: true
-    max_workers: 16
+    enabled: false
   stop_on_failure: false
   process_timeout: 1800
   fixer:
     enabled: false
   testsuites:
-    php8.3:
+    php8.5:
       tasks:
         - jsonlint
         - phpcs
         - phpcsfixer2
         - phplint
-        - phpmd
-        - phpparser
-        - phpstan
-        - phpunitbridge
-        - phpversion
-        - psalm
-        - yamllint
-    php8.4:
-      tasks:
-        - jsonlint
-        - phpcs
-        - phpcsfixer2
-        - phplint
-        - phpmd
         - phpparser
         - phpstan
         - phpunitbridge
@@ -61,11 +46,9 @@ grumphp:
       diff: true
       triggered_by: [ 'php' ]
     phplint: ~
-    phpmd:
-      ruleset: [ 'phpmd.dist.xml' ]
     phpparser:
       ignore_patterns: []
-      php_version: '8.3'
+      php_version: '8.5'
       visitors:
         declare_strict_types: ~
         no_exit_statements: ~

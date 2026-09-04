@@ -4,24 +4,28 @@ declare(strict_types=1);
 
 namespace PixelFederation\DoctrineGenericTypesBundle\Tests\Integration\Doctrine;
 
+use DateInterval;
+use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PixelFederation\DoctrineGenericTypesBundle\DependencyInjection\Configuration;
 use PixelFederation\DoctrineGenericTypesBundle\DependencyInjection\PixelFederationDoctrineGenericTypesExtension;
-use PixelFederation\DoctrineGenericTypesBundle\Doctrine\Connection\ConnectionFactory;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\TypeRegistry\DefaultTypeRegistryProvider;
 use PixelFederation\DoctrineGenericTypesBundle\Doctrine\TypeRegistry\GenericTypesRegistrator;
-use PixelFederation\DoctrineGenericTypesBundle\Doctrine\TypeRegistry\TypeRegistryProviderInterface;
+use PixelFederation\DoctrineGenericTypesBundle\PixelFederationDoctrineGenericTypesBundle;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\CustomValue\Currency;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\CustomValue\Price;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Entity\Foo;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\OtherValue\Age;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\Amount;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\Count;
+use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\ExternalCode;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\FirstName;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\IsActive;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\IsExpired;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\LastName;
+use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\OpeningTime;
+use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\RetentionPeriod;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\SuccessRate;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\Value\UserId;
 use PixelFederation\DoctrineGenericTypesBundle\Tests\TestApplication\ValueWithoutGenericType\HeightInCm;
@@ -30,12 +34,11 @@ use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Tester\CommandTester;
 
-#[CoversClass(ConnectionFactory::class)]
 #[CoversClass(GenericTypesRegistrator::class)]
 #[CoversClass(DefaultTypeRegistryProvider::class)]
-#[CoversClass(TypeRegistryProviderInterface::class)]
 #[CoversClass(Configuration::class)]
 #[CoversClass(PixelFederationDoctrineGenericTypesExtension::class)]
+#[CoversClass(PixelFederationDoctrineGenericTypesBundle::class)]
 final class CrudTest extends KernelTestCase
 {
     public function testCrud(): void
@@ -60,6 +63,9 @@ final class CrudTest extends KernelTestCase
         $age = new Age(30);
         $heightInCm = new HeightInCm(180);
         $price = new Price(99.99, Currency::EUR);
+        $externalCode = new ExternalCode('external-123');
+        $openingTime = new OpeningTime(new DateTimeImmutable('1970-01-01 09:30:00'));
+        $retentionPeriod = new RetentionPeriod(new DateInterval('P1Y2M3D'));
 
         $newFoo = new Foo(
             userId: $userId,
@@ -73,9 +79,13 @@ final class CrudTest extends KernelTestCase
             age: $age,
             heightInCm: $heightInCm,
             price: $price,
+            externalCode: $externalCode,
+            openingTime: $openingTime,
+            retentionPeriod: $retentionPeriod,
         );
         $entityManager->persist($newFoo);
         $entityManager->flush();
+        $entityManager->clear();
 
         $all = $entityManager->getRepository(Foo::class)->findAll();
         self::assertCount(1, $all);
@@ -92,12 +102,16 @@ final class CrudTest extends KernelTestCase
         self::assertEquals($age, $fooFromDb->age);
         self::assertEquals($heightInCm, $fooFromDb->heightInCm);
         self::assertEquals($price, $fooFromDb->price);
+        self::assertEquals($externalCode, $fooFromDb->externalCode);
+        self::assertEquals($openingTime, $fooFromDb->openingTime);
+        self::assertEquals($retentionPeriod, $fooFromDb->retentionPeriod);
 
         $updatedCount = new Count(10);
         $updatedPrice = new Price(10.5, Currency::USD);
         $fooFromDb->count = $updatedCount;
         $fooFromDb->price = $updatedPrice;
         $entityManager->flush();
+        $entityManager->clear();
 
         $updatedFoo = $entityManager->getRepository(Foo::class)->find($userId);
         self::assertEquals($updatedCount, $updatedFoo->count);

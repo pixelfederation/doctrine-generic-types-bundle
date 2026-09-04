@@ -11,7 +11,7 @@ use PixelFederation\DoctrineGenericTypesBundle\Exception\InvalidDatabaseTypeExce
  * @implements BaseValue<string>
  * @psalm-consistent-constructor
  */
-abstract class StringValue implements BaseValue
+abstract readonly class StringValue implements BaseValue
 {
     public function __construct(
         protected string $value,

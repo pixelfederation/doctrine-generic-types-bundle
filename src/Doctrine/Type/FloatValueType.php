@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace PixelFederation\DoctrineGenericTypesBundle\Doctrine\Type;
 
-use Doctrine\DBAL\Platforms\AbstractPlatform;
+use Doctrine\DBAL\Types\FloatType;
+use Doctrine\DBAL\Types\Type;
 use Override;
 use PixelFederation\DoctrineGenericTypesBundle\Value\FloatValue;
 
@@ -14,16 +15,17 @@ use PixelFederation\DoctrineGenericTypesBundle\Value\FloatValue;
 final class FloatValueType extends BaseGenericType
 {
     /**
-     * @psalm-suppress InvalidClassConstantType
-     */
-    protected const string ABSTRACT_VALUE = FloatValue::class;
-
-    /**
-     * @inheritdoc
+     * @return class-string<FloatValue>
      */
     #[Override]
-    public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
+    protected static function getAbstractValueClass(): string
     {
-        return $platform->getFloatDeclarationSQL($column);
+        return FloatValue::class;
+    }
+
+    #[Override]
+    protected static function createDoctrineType(): Type
+    {
+        return new FloatType();
     }
 }
