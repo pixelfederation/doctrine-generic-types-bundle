@@ -152,8 +152,12 @@ final class PixelFederationDoctrineGenericTypesExtensionTest extends AbstractExt
 
     public function testEmptyConfig(): void
     {
-        $this->expectNotToPerformAssertions();
         $this->load();
+
+        $this->assertContainerBuilderHasParameter(
+            'pixel_federation.doctrine_generic_types.generic_types_mapping',
+            [],
+        );
     }
 
     public function testStaticGenericTypeFactoryHasDefaultPriority(): void
